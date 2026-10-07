@@ -2,3 +2,4 @@
 export * from './domain';
 export * from './health';
 export * from './eligibility';
+export * from './api';

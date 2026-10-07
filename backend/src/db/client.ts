@@ -4,6 +4,7 @@ import { getEnv } from '../env';
 import * as schema from './schema';
 
 export type Database = ReturnType<typeof createDatabase>;
+export type Db = Database['db'];
 
 function createDatabase(url: string) {
   const sql = postgres(url, {

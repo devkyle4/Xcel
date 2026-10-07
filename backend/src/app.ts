@@ -1,23 +1,45 @@
+import type { ApiError } from '@xcel/shared';
 import { Hono } from 'hono';
+import { HTTPException } from 'hono/http-exception';
 import { secureHeaders } from 'hono/secure-headers';
-import { pingDatabase as defaultPing } from './db/client';
+import { type Database, getDatabase, pingDatabase as defaultPing } from './db/client';
+import { NotFoundError, ValidationError } from './lib/http';
+import { catalogueRoutes } from './modules/catalogue';
+import { eligibilityRoutes } from './modules/eligibility';
+import { programmeRoutes } from './modules/programmes';
+import { scholarshipRoutes } from './modules/scholarships';
+import { universityRoutes } from './modules/universities';
 import { healthRoutes } from './routes/health';
 
 export interface AppDeps {
+  getDatabase: () => Database;
   pingDatabase: () => Promise<boolean>;
 }
 
-export function createApp(deps: AppDeps = { pingDatabase: defaultPing }) {
+export function createApp(overrides: Partial<AppDeps> = {}) {
+  const deps: AppDeps = { getDatabase, pingDatabase: defaultPing, ...overrides };
+  const db = () => deps.getDatabase().db;
+
   const app = new Hono().basePath('/api');
 
   app.use(secureHeaders());
   app.route('/health', healthRoutes(deps.pingDatabase));
+  app.route('/', catalogueRoutes(db));
+  app.route('/universities', universityRoutes(db));
+  app.route('/programmes', programmeRoutes(db));
+  app.route('/scholarships', scholarshipRoutes(db));
+  app.route('/eligibility', eligibilityRoutes(db));
 
-  app.notFound((c) => c.json({ error: 'Not found' }, 404));
+  app.notFound((c) => c.json<ApiError>({ error: 'Not found' }, 404));
   app.onError((err, c) => {
-    // Log only the error, never request bodies — they may contain student data.
+    if (err instanceof ValidationError) {
+      return c.json<ApiError>({ error: err.message, issues: err.issues }, 400);
+    }
+    if (err instanceof NotFoundError) return c.json<ApiError>({ error: err.message }, 404);
+    if (err instanceof HTTPException) return err.getResponse();
+    // Log only the error, never request bodies or query strings.
     console.error(err);
-    return c.json({ error: 'Internal server error' }, 500);
+    return c.json<ApiError>({ error: 'Internal server error' }, 500);
   });
 
   return app;
