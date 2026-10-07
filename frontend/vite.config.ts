@@ -14,5 +14,7 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    // CSS is skipped in tests except the tokens, which the contrast test reads.
+    css: { include: [/tokens\.css/] },
   },
 });
