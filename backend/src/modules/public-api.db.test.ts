@@ -10,7 +10,7 @@ import {
   type UniversityDetail,
   type UniversitySummary,
 } from '@xcel/shared';
-import { sql } from 'drizzle-orm';
+import { eq, sql } from 'drizzle-orm';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../app';
 import { getDatabase } from '../db/client';
@@ -55,7 +55,8 @@ async function cycleWithRequirements(
     .values({
       programmeId,
       academicYear,
-      status,
+      // Requirements can only be added while a cycle is a draft; status is set below.
+      status: 'draft',
       applicationDeadline: day(60),
       applicationUrl: 'https://apply.example.edu',
     })
@@ -72,6 +73,12 @@ async function cycleWithRequirements(
       sortOrder: i,
     })),
   );
+  if (status === 'published') {
+    await db
+      .update(programmeAdmissionCycles)
+      .set({ status, publishedAt: new Date() })
+      .where(eq(programmeAdmissionCycles.id, cycle!.id));
+  }
   return cycle!;
 }
 

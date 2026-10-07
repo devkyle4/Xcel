@@ -1,6 +1,7 @@
 import type { RequirementGroupNode, RequirementNode } from '@xcel/shared';
-import { asc, inArray } from 'drizzle-orm';
-import type { Db } from '../db/client';
+import { asc, eq, inArray } from 'drizzle-orm';
+import { randomUUID } from 'node:crypto';
+import type { Executor } from '../db/client';
 import { requirementGroups, requirementRules } from '../db/schema';
 
 type GroupRow = Pick<
@@ -71,7 +72,7 @@ export function buildRequirementTrees(
 
 /** Loads the requirement tree of each given admission cycle. */
 export async function loadRequirementTrees(
-  db: Db,
+  db: Executor,
   cycleIds: string[],
 ): Promise<Map<string, RequirementGroupNode>> {
   if (cycleIds.length === 0) return new Map();
@@ -111,4 +112,60 @@ export async function loadRequirementTrees(
           .orderBy(asc(requirementRules.sortOrder));
 
   return buildRequirementTrees(groups, rules);
+}
+
+type TreeInput = {
+  kind: 'group';
+  operator: RequirementGroupNode['operator'];
+  minCount?: number | null;
+  label?: string | null;
+  children: readonly (
+    TreeInput | { kind: 'rule'; ruleType: string; params: unknown; label?: string | null }
+  )[];
+};
+
+/**
+ * Replaces a cycle's whole requirement tree (null removes it). Node ids are
+ * generated here, so the tree is inserted with two statements whatever its
+ * size. Must run inside the transaction that audits the change.
+ */
+export async function replaceRequirementTree(
+  tx: Executor,
+  cycleId: string,
+  root: TreeInput | null,
+) {
+  await tx.delete(requirementGroups).where(eq(requirementGroups.cycleId, cycleId));
+  if (!root) return;
+
+  const groupRows: (typeof requirementGroups.$inferInsert)[] = [];
+  const ruleRows: (typeof requirementRules.$inferInsert)[] = [];
+
+  const visit = (group: TreeInput, parentGroupId: string | null, sortOrder: number) => {
+    const id = randomUUID();
+    groupRows.push({
+      id,
+      cycleId,
+      parentGroupId,
+      operator: group.operator,
+      minCount: group.minCount ?? null,
+      label: group.label ?? null,
+      sortOrder,
+    });
+    group.children.forEach((child, i) => {
+      if (child.kind === 'group') visit(child, id, i);
+      else {
+        ruleRows.push({
+          groupId: id,
+          ruleType: child.ruleType,
+          params: child.params as Record<string, unknown>,
+          label: child.label ?? null,
+          sortOrder: i,
+        });
+      }
+    });
+  };
+  visit(root, null, 0);
+
+  await tx.insert(requirementGroups).values(groupRows);
+  if (ruleRows.length > 0) await tx.insert(requirementRules).values(ruleRows);
 }

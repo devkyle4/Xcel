@@ -74,7 +74,14 @@ export async function parseJson<S extends z.ZodType>(c: Context, schema: S): Pro
 }
 
 /** The request conflicts with the current state, e.g. a disallowed status change (409). */
-export class ConflictError extends Error {}
+export class ConflictError extends Error {
+  constructor(
+    message: string,
+    public readonly issues?: Issue[],
+  ) {
+    super(message);
+  }
+}
 
 /** Postgres error code from a database error, looking through Drizzle's wrapper. */
 export function pgErrorCode(error: unknown): string | undefined {

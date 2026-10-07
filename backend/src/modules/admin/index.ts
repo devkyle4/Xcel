@@ -4,6 +4,7 @@ import type { Db } from '../../db/client';
 import { type AdminEnv, requireRole } from '../../lib/auth/middleware';
 import { auditLogRoutes } from './audit-logs';
 import { adminAuthRoutes } from './auth';
+import { cycleAdminRoutes } from './cycles';
 import { programmeAdminRoutes } from './programmes';
 import { settingsAdminRoutes } from './settings';
 import { sourceAdminRoutes } from './sources';
@@ -35,6 +36,7 @@ export function adminRoutes(db: () => Db) {
   admin.route('/sources', sourceAdminRoutes(db));
   admin.route('/verification', verificationRoutes(db));
   admin.route('/settings', settingsAdminRoutes(db));
+  admin.route('/', cycleAdminRoutes(db));
 
   return admin;
 }

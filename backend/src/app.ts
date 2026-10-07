@@ -38,10 +38,19 @@ export function createApp(overrides: Partial<AppDeps> = {}) {
       return c.json<ApiError>({ error: err.message, issues: err.issues }, 400);
     }
     if (err instanceof NotFoundError) return c.json<ApiError>({ error: err.message }, 404);
-    if (err instanceof ConflictError) return c.json<ApiError>({ error: err.message }, 409);
+    if (err instanceof ConflictError) {
+      return c.json<ApiError>(
+        { error: err.message, ...(err.issues && { issues: err.issues }) },
+        409,
+      );
+    }
     if (err instanceof HTTPException) return err.getResponse();
     if (pgErrorCode(err) === '23505') {
       return c.json<ApiError>({ error: 'A record with these details already exists' }, 409);
+    }
+    // Raised by database triggers protecting history, e.g. editing a published cycle.
+    if (pgErrorCode(err) === '23000') {
+      return c.json<ApiError>({ error: 'This change is not allowed for this record' }, 409);
     }
     // Log only the error, never request bodies or query strings.
     console.error(err);
