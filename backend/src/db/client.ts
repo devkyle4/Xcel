@@ -5,6 +5,9 @@ import * as schema from './schema';
 
 export type Database = ReturnType<typeof createDatabase>;
 export type Db = Database['db'];
+export type Tx = Parameters<Parameters<Db['transaction']>[0]>[0];
+/** Either the database or an open transaction. */
+export type Executor = Db | Tx;
 
 function createDatabase(url: string) {
   const sql = postgres(url, {

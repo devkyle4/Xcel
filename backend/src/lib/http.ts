@@ -55,3 +55,20 @@ export function paginate({ page, pageSize }: { page: number; pageSize: number })
 export async function countOf(query: PromiseLike<{ total: number }[]>): Promise<number> {
   return (await query)[0]?.total ?? 0;
 }
+
+/** Parses a JSON request body with a zod schema, throwing ValidationError (400) on failure. */
+export async function parseJson<S extends z.ZodType>(c: Context, schema: S): Promise<z.output<S>> {
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    throw new ValidationError([{ path: '', message: 'Request body must be valid JSON' }]);
+  }
+  const result = schema.safeParse(body);
+  if (!result.success) {
+    throw new ValidationError(
+      result.error.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
+    );
+  }
+  return result.data;
+}

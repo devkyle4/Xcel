@@ -4,6 +4,7 @@ import { HTTPException } from 'hono/http-exception';
 import { secureHeaders } from 'hono/secure-headers';
 import { type Database, getDatabase, pingDatabase as defaultPing } from './db/client';
 import { NotFoundError, ValidationError } from './lib/http';
+import { adminRoutes } from './modules/admin';
 import { catalogueRoutes } from './modules/catalogue';
 import { eligibilityRoutes } from './modules/eligibility';
 import { programmeRoutes } from './modules/programmes';
@@ -29,6 +30,7 @@ export function createApp(overrides: Partial<AppDeps> = {}) {
   app.route('/programmes', programmeRoutes(db));
   app.route('/scholarships', scholarshipRoutes(db));
   app.route('/eligibility', eligibilityRoutes(db));
+  app.route('/admin', adminRoutes(db));
 
   app.notFound((c) => c.json<ApiError>({ error: 'Not found' }, 404));
   app.onError((err, c) => {
