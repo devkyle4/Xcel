@@ -13,7 +13,7 @@ function createDatabase(url: string) {
     max: 1,
     idle_timeout: 20,
   });
-  return { sql, db: drizzle(sql, { schema }) };
+  return { sql, db: drizzle(sql, { schema, casing: 'snake_case' }) };
 }
 
 // Module-level cache so warm serverless invocations reuse the connection.

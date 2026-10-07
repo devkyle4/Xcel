@@ -1,2 +1,12 @@
-// Drizzle table definitions. Populated in milestone 2.
-export {};
+export * from './academic';
+export * from './audit';
+export * from './enums';
+export * from './mentors';
+export * from './programmes';
+export * from './relations';
+export * from './reports';
+export * from './scholarships';
+export * from './settings';
+export * from './universities';
+export * from './users';
+export * from './verification';

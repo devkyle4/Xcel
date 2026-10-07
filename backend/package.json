@@ -9,7 +9,9 @@
     "typecheck": "tsc -p tsconfig.json",
     "test": "vitest run",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx --env-file-if-exists=.env src/db/seed/run.ts",
+    "test:db": "vitest run --config vitest.db.config.ts"
   },
   "dependencies": {
     "@hono/node-server": "^2.1.3",
