@@ -1,4 +1,4 @@
-import type { PublishStatus } from './domain';
+import type { PublishStatus, ReportStatus, ScholarshipStatus } from './domain';
 
 /**
  * Allowed publishing-workflow transitions:
@@ -29,3 +29,24 @@ export function slugify(name: string, maxLength = 80): string {
     .slice(0, maxLength)
     .replace(/^-+|-+$/g, '');
 }
+
+/**
+ * Scholarship statuses. Expired scholarships can be republished once a new
+ * cycle with future dates is added; archived ones are restored as drafts.
+ */
+export const SCHOLARSHIP_TRANSITIONS: Readonly<
+  Record<ScholarshipStatus, readonly ScholarshipStatus[]>
+> = {
+  draft: ['published', 'archived'],
+  published: ['expired', 'draft', 'archived'],
+  expired: ['published', 'archived'],
+  archived: ['draft'],
+};
+
+/** User report triage: resolved or dismissed reports can be reopened. */
+export const REPORT_TRANSITIONS: Readonly<Record<ReportStatus, readonly ReportStatus[]>> = {
+  open: ['under_review', 'resolved', 'dismissed'],
+  under_review: ['open', 'resolved', 'dismissed'],
+  resolved: ['open'],
+  dismissed: ['open'],
+};

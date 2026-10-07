@@ -3,9 +3,13 @@ import { csrf } from 'hono/csrf';
 import type { Db } from '../../db/client';
 import { type AdminEnv, requireRole } from '../../lib/auth/middleware';
 import { auditLogRoutes } from './audit-logs';
+import { academicAdminRoutes } from './academic';
 import { adminAuthRoutes } from './auth';
 import { cycleAdminRoutes } from './cycles';
+import { dashboardRoutes } from './dashboard';
 import { programmeAdminRoutes } from './programmes';
+import { reportAdminRoutes } from './reports';
+import { scholarshipAdminRoutes } from './scholarships';
 import { settingsAdminRoutes } from './settings';
 import { sourceAdminRoutes } from './sources';
 import { facultySchoolAdminRoutes, universityAdminRoutes } from './universities';
@@ -37,6 +41,10 @@ export function adminRoutes(db: () => Db) {
   admin.route('/verification', verificationRoutes(db));
   admin.route('/settings', settingsAdminRoutes(db));
   admin.route('/', cycleAdminRoutes(db));
+  admin.route('/', scholarshipAdminRoutes(db));
+  admin.route('/', academicAdminRoutes(db));
+  admin.route('/reports', reportAdminRoutes(db));
+  admin.route('/dashboard', dashboardRoutes(db));
 
   return admin;
 }

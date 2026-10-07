@@ -23,7 +23,7 @@ import { latestVerifications } from '../lib/verification';
 const PUBLIC_STATUSES = ['published', 'expired'] as const;
 
 /** Each scholarship's latest cycle. */
-function currentCycles(db: Db) {
+export function currentScholarshipCycles(db: Db) {
   return db
     .selectDistinctOn([scholarshipCycles.scholarshipId], {
       scholarshipId: scholarshipCycles.scholarshipId,
@@ -38,7 +38,7 @@ function currentCycles(db: Db) {
     .as('current_cycle');
 }
 
-type CurrentCycles = ReturnType<typeof currentCycles>;
+type CurrentCycles = ReturnType<typeof currentScholarshipCycles>;
 
 /** SQL twin of scholarshipAvailability() in the shared package, used for filtering. */
 function availabilitySql(current: CurrentCycles, today: string): SQL<string> {
@@ -59,7 +59,7 @@ export async function scholarshipSummaries(
   } = {},
 ) {
   const today = ghanaToday();
-  const current = currentCycles(db);
+  const current = currentScholarshipCycles(db);
   const query = db
     .select({
       slug: scholarships.slug,
@@ -143,7 +143,7 @@ export function scholarshipRoutes(db: () => Db) {
         }),
       });
 
-      const current = currentCycles(db());
+      const current = currentScholarshipCycles(db());
       const today = ghanaToday();
       const total = await countOf(
         db()

@@ -309,7 +309,8 @@ describe('versioning', () => {
     const actions = await db
       .select({ action: auditLogs.action, entityId: auditLogs.entityId, after: auditLogs.after })
       .from(auditLogs)
-      .where(eq(auditLogs.entityId, v1.id));
+      .where(eq(auditLogs.entityId, v1.id))
+      .orderBy(auditLogs.id);
     expect(actions.at(-1)).toMatchObject({
       action: 'admission_cycle.status',
       after: { status: 'archived', supersededBy: v2.body.id },

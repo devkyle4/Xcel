@@ -93,7 +93,7 @@ export async function listVerifications(
 }
 
 /** Verified or published records whose last successful verification is older than the threshold. */
-async function staleRecords(db: Db, staleAfterDays: number): Promise<StaleRecord[]> {
+export async function staleRecords(db: Db, staleAfterDays: number): Promise<StaleRecord[]> {
   const latestVerified = (type: VerifiableEntityType, idColumn: SQL) => sql`
     LEFT JOIN LATERAL (
       SELECT vr.verified_at FROM verification_records vr
@@ -109,18 +109,28 @@ async function staleRecords(db: Db, staleAfterDays: number): Promise<StaleRecord
     status: StaleRecord['status'];
     last_verified_at: Date | null;
   }>(sql`
-    SELECT 'university' AS entity_type, u.id AS entity_id, u.name AS label, u.status,
+    SELECT 'university' AS entity_type, u.id AS entity_id, u.name AS label, u.status::text AS status,
            lv.verified_at AS last_verified_at
     FROM universities u
     ${latestVerified('university', sql`u.id`)}
     WHERE u.status IN ('verified', 'published') AND ${isStale}
     UNION ALL
-    SELECT 'programme_admission_cycle', c.id, p.name || ' (' || c.academic_year || ')', c.status,
+    SELECT 'programme_admission_cycle', c.id, p.name || ' (' || c.academic_year || ')', c.status::text,
            lv.verified_at
     FROM programme_admission_cycles c
     JOIN programmes p ON p.id = c.programme_id
     ${latestVerified('programme_admission_cycle', sql`c.id`)}
     WHERE c.status IN ('verified', 'published') AND ${isStale}
+    UNION ALL
+    SELECT 'scholarship_cycle', sc.id, s.name || ' (' || sc.academic_year || ')', s.status::text,
+           lv.verified_at
+    FROM scholarships s
+    JOIN LATERAL (
+      SELECT id, academic_year FROM scholarship_cycles
+      WHERE scholarship_id = s.id ORDER BY academic_year DESC LIMIT 1
+    ) sc ON true
+    ${latestVerified('scholarship_cycle', sql`sc.id`)}
+    WHERE s.status = 'published' AND ${isStale}
     ORDER BY last_verified_at ASC NULLS FIRST, label`);
 
   return rows.map((r) => ({

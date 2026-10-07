@@ -4,3 +4,4 @@ export * from './scholarships';
 export * from './admin';
 export * from './admin-content';
 export * from './admin-cycles';
+export * from './admin-catalogue';

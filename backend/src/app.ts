@@ -8,6 +8,7 @@ import { adminRoutes } from './modules/admin';
 import { catalogueRoutes } from './modules/catalogue';
 import { eligibilityRoutes } from './modules/eligibility';
 import { programmeRoutes } from './modules/programmes';
+import { reportRoutes } from './modules/reports';
 import { scholarshipRoutes } from './modules/scholarships';
 import { universityRoutes } from './modules/universities';
 import { healthRoutes } from './routes/health';
@@ -30,6 +31,7 @@ export function createApp(overrides: Partial<AppDeps> = {}) {
   app.route('/programmes', programmeRoutes(db));
   app.route('/scholarships', scholarshipRoutes(db));
   app.route('/eligibility', eligibilityRoutes(db));
+  app.route('/reports', reportRoutes(db));
   app.route('/admin', adminRoutes(db));
 
   app.notFound((c) => c.json<ApiError>({ error: 'Not found' }, 404));

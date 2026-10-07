@@ -5,6 +5,7 @@ import {
   INSTITUTION_TYPES,
   PUBLISH_STATUSES,
   type PublishStatus,
+  type ScholarshipStatus,
   VERIFIABLE_ENTITY_TYPES,
   type VerifiableEntityType,
   VERIFICATION_STATUSES,
@@ -157,7 +158,7 @@ export interface StaleRecord {
   entityType: VerifiableEntityType;
   entityId: string;
   label: string;
-  status: PublishStatus;
+  status: PublishStatus | ScholarshipStatus;
   /** Null if never verified. */
   lastVerifiedAt: string | null;
 }
