@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.vercel/
+coverage/
+docs/
+*.tsbuildinfo
+Claude.md
+
+# Environment files — never commit secrets
+.env
+.env.*
+.env.example
+
+
+# Editors / OS
+.DS_Store
+.idea/
+*.swp
+
+# Office lock files
+~$*

@@ -1,0 +1,24 @@
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--blue-950);
+  background: var(--white);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--blue-700);
+}
+
+:focus-visible {
+  outline: 3px solid var(--blue-700);
+  outline-offset: 2px;
+}
