@@ -1,0 +1,21 @@
+{
+  "name": "xcel",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.26.0",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @xcel/backend --filter @xcel/frontend dev",
+    "build": "pnpm -r build",
+    "build:vercel": "pnpm --filter @xcel/frontend build && node scripts/build-vercel.mjs",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm -r test",
+    "db:generate": "pnpm --filter @xcel/backend db:generate",
+    "db:migrate": "pnpm --filter @xcel/backend db:migrate"
+  }
+}
