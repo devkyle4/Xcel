@@ -3,7 +3,7 @@ import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { secureHeaders } from 'hono/secure-headers';
 import { type Database, getDatabase, pingDatabase as defaultPing } from './db/client';
-import { NotFoundError, ValidationError } from './lib/http';
+import { ConflictError, NotFoundError, pgErrorCode, ValidationError } from './lib/http';
 import { adminRoutes } from './modules/admin';
 import { catalogueRoutes } from './modules/catalogue';
 import { eligibilityRoutes } from './modules/eligibility';
@@ -38,7 +38,11 @@ export function createApp(overrides: Partial<AppDeps> = {}) {
       return c.json<ApiError>({ error: err.message, issues: err.issues }, 400);
     }
     if (err instanceof NotFoundError) return c.json<ApiError>({ error: err.message }, 404);
+    if (err instanceof ConflictError) return c.json<ApiError>({ error: err.message }, 409);
     if (err instanceof HTTPException) return err.getResponse();
+    if (pgErrorCode(err) === '23505') {
+      return c.json<ApiError>({ error: 'A record with these details already exists' }, 409);
+    }
     // Log only the error, never request bodies or query strings.
     console.error(err);
     return c.json<ApiError>({ error: 'Internal server error' }, 500);

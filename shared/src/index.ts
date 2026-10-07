@@ -3,3 +3,4 @@ export * from './domain';
 export * from './health';
 export * from './eligibility';
 export * from './api';
+export * from './publishing';
