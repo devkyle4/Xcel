@@ -1,24 +1,16 @@
+@import 'tailwindcss';
 @import './tokens.css';
 
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
+@layer base {
+  body {
+    @apply bg-white font-sans leading-normal text-blue-950;
+  }
 
-body {
-  margin: 0;
-  font-family: var(--font-sans);
-  color: var(--blue-950);
-  background: var(--white);
-  line-height: 1.5;
-}
+  a {
+    @apply text-blue-700;
+  }
 
-a {
-  color: var(--blue-700);
-}
-
-:focus-visible {
-  outline: 3px solid var(--blue-700);
-  outline-offset: 2px;
+  :focus-visible {
+    @apply outline-3 outline-offset-2 outline-blue-700;
+  }
 }

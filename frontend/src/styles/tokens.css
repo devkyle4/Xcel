@@ -1,30 +1,38 @@
-/* Design tokens (SRS 11.5). Components must use these variables, never raw hex values. */
-:root {
-  --blue-50: #eff6ff;
-  --blue-100: #dbeafe;
-  --blue-300: #93c5fd;
-  --blue-500: #3b82f6;
-  --blue-700: #1d4ed8;
-  --blue-900: #1e3a8a;
-  --blue-950: #0b1f4d;
+/*
+ * Design tokens (SRS 11.5) as a Tailwind theme. The default Tailwind palette is
+ * cleared so only these colours exist: use bg-blue-700, text-green-900, etc.
+ * Each token is also exposed as a CSS variable, e.g. var(--color-blue-700).
+ */
+@theme {
+  --color-*: initial;
 
-  --green-50: #f0fdf4;
-  --green-100: #dcfce7;
-  --green-300: #86efac;
-  --green-500: #22c55e;
-  --green-700: #15803d;
-  --green-800: #166534;
-  --green-900: #14532d;
+  --color-blue-50: #eff6ff;
+  --color-blue-100: #dbeafe;
+  --color-blue-300: #93c5fd;
+  --color-blue-500: #3b82f6;
+  --color-blue-700: #1d4ed8;
+  --color-blue-900: #1e3a8a;
+  --color-blue-950: #0b1f4d;
 
-  --red-50: #fef2f2;
-  --red-100: #fee2e2;
-  --red-300: #fca5a5;
-  --red-600: #dc2626;
-  --red-700: #b91c1c;
-  --red-800: #991b1b;
+  --color-green-50: #f0fdf4;
+  --color-green-100: #dcfce7;
+  --color-green-300: #86efac;
+  --color-green-500: #22c55e;
+  --color-green-700: #15803d;
+  --color-green-800: #166534;
+  --color-green-900: #14532d;
 
-  --white: #ffffff;
-  --off-white: #f8fafc;
+  --color-red-50: #fef2f2;
+  --color-red-100: #fee2e2;
+  --color-red-300: #fca5a5;
+  --color-red-600: #dc2626;
+  --color-red-700: #b91c1c;
+  --color-red-800: #991b1b;
+
+  --color-white: #ffffff;
+  --color-off-white: #f8fafc;
+  --color-transparent: transparent;
+  --color-current: currentColor;
 
   --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
