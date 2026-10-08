@@ -9,7 +9,7 @@ import { STUDY_LEVEL_LABELS } from '../lib/format';
 import { useUrlFilters } from '../lib/url-state';
 
 const PAGE_SIZE = 20;
-const KEYS = ['q', 'availability', 'studyLevel', 'field', 'category', 'location'] as const;
+const KEYS = ['q', 'availability', 'studyLevel', 'category', 'location'] as const;
 
 const AVAILABILITY_OPTIONS = [
   ['open,upcoming', 'Open or opening soon'],
@@ -25,7 +25,6 @@ export function ScholarshipsPage() {
     q: values.q || undefined,
     availability: values.availability || undefined,
     studyLevel: values.studyLevel || undefined,
-    field: values.field || undefined,
     category: values.category || undefined,
     location: values.location || undefined,
     page,
@@ -63,14 +62,6 @@ export function ScholarshipsPage() {
           options={STUDY_LEVELS.map((l) => [l, STUDY_LEVEL_LABELS[l]] as const)}
         />
         <FilterSelect
-          id="filter-field"
-          label="Field"
-          allLabel="All fields"
-          value={values.field}
-          onChange={(v) => set('field', v)}
-          options={toOptions(options.data?.fields)}
-        />
-        <FilterSelect
           id="filter-category"
           label="Eligibility"
           allLabel="All categories"
@@ -105,7 +96,7 @@ export function ScholarshipsPage() {
               No scholarships match your search. Try different words, or clear the filters.
             </EmptyState>
           ) : (
-            <ul className="space-y-3">
+            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {list.data.items.map((s) => (
                 <li key={s.slug}>
                   <ScholarshipCard scholarship={s} />

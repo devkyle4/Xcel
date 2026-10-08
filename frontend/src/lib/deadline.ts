@@ -1,4 +1,4 @@
-import { ghanaToday, type ScholarshipSummary } from '@xcel/shared';
+import { ghanaToday, type ScholarshipAvailability, type ScholarshipSummary } from '@xcel/shared';
 import { formatDate } from './format';
 
 /**
@@ -16,3 +16,14 @@ export function deadlineText(
   }
   return s.closesOn ? `Application deadline: ${formatDate(s.closesOn)}` : null;
 }
+
+/**
+ * Wording for the link to a scholarship's official site. The link is always
+ * shown, so students can apply, check dates, or watch for the next round.
+ */
+export const OFFICIAL_LINK_LABELS: Record<ScholarshipAvailability, string> = {
+  open: 'Apply on the official website',
+  upcoming: 'See the official application page',
+  unknown: 'Check dates and apply on the official website',
+  closed: 'Visit the official website for the next round',
+};

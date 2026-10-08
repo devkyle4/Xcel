@@ -97,6 +97,10 @@ export type RuleExplanation =
   | {
       type: 'aggregate_max';
       maxAggregate: number;
+      /** 'cutoff': the maximum is an institution's published cut-off, which can change each year. */
+      basis: 'requirement' | 'cutoff';
+      /** Grade points that differ from the catalogue for this institution. */
+      gradePoints: Record<string, number>;
       /** Null when the student has not entered enough subjects to calculate it. */
       aggregate: number | null;
       counted: SubjectPoints[];

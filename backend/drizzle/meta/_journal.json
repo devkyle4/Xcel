@@ -36,6 +36,13 @@
       "when": 1791406942334,
       "tag": "0004_freeze_published_cycles",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1791425099898,
+      "tag": "0005_scholarship_logo",
+      "breakpoints": true
     }
   ]
 }

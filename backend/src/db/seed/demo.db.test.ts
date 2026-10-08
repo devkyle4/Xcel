@@ -7,7 +7,7 @@ import {
 import { afterAll, describe, expect, it } from 'vitest';
 import { createApp } from '../../app';
 import { getDatabase } from '../client';
-import { seedDemo } from './demo';
+import { removeDemo, seedDemo } from './demo';
 import { seed } from './seed';
 
 const database = getDatabase();
@@ -48,5 +48,28 @@ describe('demo data', () => {
       ['demo-regional-bursary', 'closed'],
       ['demo-women-in-stem-award', 'upcoming'],
     ]);
+  });
+
+  it('removes only the demo data, keeping history protection in place', async () => {
+    const before =
+      await database.sql`SELECT count(*)::int AS n FROM scholarships WHERE slug NOT LIKE 'demo-%'`;
+    expect(await removeDemo(database)).toEqual({ removed: true });
+    expect(await removeDemo(database)).toEqual({ removed: false });
+
+    const left = await database.sql`
+      SELECT (SELECT count(*) FROM universities WHERE slug LIKE 'demo-%')::int AS unis,
+             (SELECT count(*) FROM scholarships WHERE slug LIKE 'demo-%')::int AS schols,
+             (SELECT count(*) FROM sources WHERE title = 'Demo admissions brochure 2026/2027')::int AS sources`;
+    expect(left[0]).toEqual({ unis: 0, schols: 0, sources: 0 });
+    const after =
+      await database.sql`SELECT count(*)::int AS n FROM scholarships WHERE slug NOT LIKE 'demo-%'`;
+    expect(after[0]!.n).toBe(before[0]!.n);
+
+    // The triggers are back on: published cycles still cannot be deleted.
+    const enabled = await database.sql`
+      SELECT count(*)::int AS n FROM pg_trigger
+      WHERE tgname IN ('programme_cycles_freeze', 'requirement_groups_freeze', 'requirement_rules_freeze')
+        AND tgenabled = 'O'`;
+    expect(enabled[0]!.n).toBe(3);
   });
 });

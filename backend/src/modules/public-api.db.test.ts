@@ -461,6 +461,7 @@ describe('GET /api/scholarships', () => {
     const { body } = await get<ScholarshipDetail>('/api/scholarships/mastercard-scholars');
     expect(body).toMatchObject({
       availability: 'open',
+      officialUrl: 'https://apply.example.org',
       applicationUrl: 'https://apply.example.org',
       university: { slug: 'knust' },
       requirements: ['Admitted to a partner university', 'Ghanaian citizen'],

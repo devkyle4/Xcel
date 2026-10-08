@@ -7,7 +7,7 @@ import {
   type NodeOutcome,
   type NodeResult,
 } from '@xcel/shared';
-import { CircleCheck, CircleHelp, CircleX } from 'lucide-react';
+import { CircleCheck, CircleHelp, CircleMinus, CircleX } from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
 
 const OUTCOMES: Record<
@@ -20,8 +20,16 @@ const OUTCOMES: Record<
   unevaluable: { label: 'Not checked', Icon: CircleHelp, icon: 'text-blue-700' },
 };
 
-function OutcomeLabel({ outcome }: { outcome: NodeOutcome }) {
-  const { label, Icon, icon } = OUTCOMES[outcome];
+/** An option the student did not meet, in a group they meet through another option: not a failure. */
+const UNUSED_OPTION = {
+  label: 'Not met (another option is)',
+  Icon: CircleMinus,
+  icon: 'text-blue-700',
+};
+
+function OutcomeLabel({ outcome, unusedOption }: { outcome: NodeOutcome; unusedOption: boolean }) {
+  const { label, Icon, icon } =
+    unusedOption && outcome === 'unsatisfied' ? UNUSED_OPTION : OUTCOMES[outcome];
   return (
     <span className="inline-flex shrink-0 items-center gap-1 text-sm font-semibold">
       <Icon aria-hidden="true" className={`size-5 ${icon}`} />
@@ -35,25 +43,34 @@ function Node({
   node,
   catalogue,
   showOutcomes,
+  unusedOption,
 }: {
   node: NodeResult;
   catalogue: CatalogueIndex;
   showOutcomes: boolean;
+  /** Inside an alternative the student does not need, because another option is met. */
+  unusedOption: boolean;
 }) {
   if (node.kind === 'group') {
     return (
       <div className="border-l-4 border-blue-100 pl-4">
-        <Group group={node} catalogue={catalogue} showOutcomes={showOutcomes} />
+        <Group
+          group={node}
+          catalogue={catalogue}
+          showOutcomes={showOutcomes}
+          unusedOption={unusedOption}
+        />
       </div>
     );
   }
-  const failed = showOutcomes && node.outcome === 'unsatisfied';
+  // Red only marks a real shortfall, never an alternative the student does not need.
+  const failed = showOutcomes && node.outcome === 'unsatisfied' && !unusedOption;
   return (
     <div
       className={`rounded-md border p-3 ${failed ? 'border-red-300 bg-white' : 'border-blue-100 bg-white'}`}
     >
       <div className="flex flex-wrap items-start gap-x-3 gap-y-1">
-        {showOutcomes && <OutcomeLabel outcome={node.outcome} />}
+        {showOutcomes && <OutcomeLabel outcome={node.outcome} unusedOption={unusedOption} />}
         <span className="font-medium">{describeRequirement(node, catalogue)}</span>
       </div>
       {showOutcomes && <p className="mt-1 text-sm">{describeOutcome(node, catalogue)}</p>}
@@ -65,15 +82,22 @@ function Group({
   group,
   catalogue,
   showOutcomes,
+  unusedOption,
 }: {
   group: GroupResult;
   catalogue: CatalogueIndex;
   showOutcomes: boolean;
+  unusedOption: boolean;
 }) {
+  // Once an "any" group is met, its unmet options are just alternatives the student does not need.
+  const optionsUnused = unusedOption || (group.operator === 'any' && group.outcome === 'satisfied');
   return (
     <div className="space-y-2">
       <p className="font-semibold">
-        {describeGroup(group)}
+        {/* A labelled group (e.g. "Core subjects") reads "Core subjects: all of the following". */}
+        {group.label
+          ? `${group.label}: ${describeGroup(group).toLowerCase()}`
+          : describeGroup(group)}
         {showOutcomes && group.operator !== 'all' && !group.problem && (
           <span className="font-normal">
             {' '}
@@ -87,7 +111,12 @@ function Group({
         <ul className="space-y-2">
           {group.children.map((child) => (
             <li key={child.id}>
-              <Node node={child} catalogue={catalogue} showOutcomes={showOutcomes} />
+              <Node
+                node={child}
+                catalogue={catalogue}
+                showOutcomes={showOutcomes}
+                unusedOption={optionsUnused}
+              />
             </li>
           ))}
         </ul>
@@ -110,5 +139,7 @@ export function RequirementList({
   catalogue: CatalogueIndex;
   showOutcomes: boolean;
 }) {
-  return <Group group={root} catalogue={catalogue} showOutcomes={showOutcomes} />;
+  return (
+    <Group group={root} catalogue={catalogue} showOutcomes={showOutcomes} unusedOption={false} />
+  );
 }

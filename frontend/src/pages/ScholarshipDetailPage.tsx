@@ -2,13 +2,14 @@ import { Link, useParams } from 'react-router';
 import { ExternalLinkButton } from '../components/ExternalLinkButton';
 import { LoadError, Loading } from '../components/LoadState';
 import { PageContainer } from '../components/PageContainer';
+import { ProviderLogo } from '../components/ProviderLogo';
 import { ReportForm } from '../components/ReportForm';
 import { AvailabilityBadge } from '../components/ui/AvailabilityBadge';
 import { InfoPanel } from '../components/ui/InfoPanel';
 import { VerificationLine } from '../components/VerificationLine';
 import { useScholarship } from '../hooks/queries';
 import { ApiRequestError } from '../lib/api';
-import { deadlineText } from '../lib/deadline';
+import { deadlineText, OFFICIAL_LINK_LABELS } from '../lib/deadline';
 import { formatDate, STUDY_LEVEL_LABELS } from '../lib/format';
 import { NotFoundPage } from './NotFoundPage';
 
@@ -45,7 +46,10 @@ export function ScholarshipDetailPage() {
 
   return (
     <PageContainer title={s.name}>
-      <p className="-mt-4 text-lg">
+      <div className="-mt-2">
+        <ProviderLogo src={s.logoUrl} name={s.providerName} size="lg" />
+      </div>
+      <p className="text-lg">
         Offered by{' '}
         {s.providerUrl ? (
           <a href={s.providerUrl} target="_blank" rel="noopener noreferrer">
@@ -100,9 +104,9 @@ export function ScholarshipDetailPage() {
 
       <VerificationLine verification={s.verification} />
 
-      {s.applicationUrl && !closed && (
-        <ExternalLinkButton href={s.applicationUrl}>
-          Apply on the official website
+      {s.officialUrl && (
+        <ExternalLinkButton href={s.officialUrl}>
+          {OFFICIAL_LINK_LABELS[s.availability]}
         </ExternalLinkButton>
       )}
 

@@ -111,6 +111,8 @@ export interface ScholarshipSummary {
   slug: string;
   name: string;
   providerName: string;
+  /** Provider logo (https URL or a /logos/ path on this site), or null. */
+  logoUrl: string | null;
   studyLevels: StudyLevel[];
   fields: string[];
   eligibilityCategories: string[];
@@ -120,6 +122,8 @@ export interface ScholarshipSummary {
   opensOn: string | null;
   closesOn: string | null;
   availability: ScholarshipAvailability;
+  /** Where to apply or find official details: the cycle's application page, else the provider's site. */
+  officialUrl: string | null;
 }
 
 export interface ScholarshipDetail extends ScholarshipSummary {

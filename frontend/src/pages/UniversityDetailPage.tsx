@@ -76,7 +76,7 @@ export function UniversityDetailPage() {
           <h2 id="scholarships-heading" className="text-2xl font-bold">
             Scholarships
           </h2>
-          <ul className="space-y-3">
+          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {u.scholarships.map((s) => (
               <li key={s.slug}>
                 <ScholarshipCard scholarship={s} />

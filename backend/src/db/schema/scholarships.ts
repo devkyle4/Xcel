@@ -26,6 +26,8 @@ export const scholarships = pgTable(
     name: text().notNull(),
     providerName: text().notNull(),
     providerUrl: text(),
+    /** The provider's logo: an https URL or a path under the site's /logos/ folder. */
+    logoUrl: text(),
     universityId: uuid().references(() => universities.id, { onDelete: 'set null' }),
     description: text(),
     coverage: text(),

@@ -42,6 +42,24 @@ function describeComponent(c: AggregateComponentResult, catalogue: CatalogueInde
     : `best ${c.count} ${categoryNoun(c.category, c.count)}`;
 }
 
+/**
+ * Grade points that differ from the catalogue, e.g. "C5 and C6 count as 4",
+ * or an empty string when none differ.
+ */
+function describeGradePoints(points: Record<string, number>, catalogue: CatalogueIndex): string {
+  const byValue = new Map<number, string[]>();
+  for (const [code, value] of Object.entries(points)) {
+    if (catalogue.grade(code)?.points === value) continue;
+    byValue.set(value, [...(byValue.get(value) ?? []), code]);
+  }
+  return [...byValue]
+    .map(
+      ([value, codes]) =>
+        `${joinWords(codes, 'and')} ${codes.length === 1 ? 'counts' : 'count'} as ${value}`,
+    )
+    .join('; ');
+}
+
 /** What the requirement asks for, e.g. "Chemistry or Biology: C6 or better". */
 export function describeRequirement(rule: RuleResult, catalogue: CatalogueIndex): string {
   const e = rule.explanation;
@@ -57,10 +75,15 @@ export function describeRequirement(rule: RuleResult, catalogue: CatalogueIndex)
         : '';
       return `${pool}${excluded}: ${e.minGrade} or better`;
     }
-    case 'aggregate_max':
-      return `Aggregate of ${e.maxAggregate} or better (lower is better), counting ${e.components
-        .map((c) => describeComponent(c, catalogue))
-        .join(', ')}`;
+    case 'aggregate_max': {
+      const counting = e.components.map((c) => describeComponent(c, catalogue)).join(', ');
+      const scoring = describeGradePoints(e.gradePoints, catalogue);
+      const what =
+        e.basis === 'cutoff'
+          ? `Aggregate of ${e.maxAggregate} or better (lower is better), the latest published cut-off, which can change each year`
+          : `Aggregate of ${e.maxAggregate} or better (lower is better)`;
+      return `${what}. Counting ${counting}${scoring ? `; ${scoring}` : ''}`;
+    }
     case 'manual_review':
       return e.description;
     case 'invalid':
@@ -110,6 +133,11 @@ export function describeOutcome(rule: RuleResult, catalogue: CatalogueIndex): st
     case 'aggregate_max':
       if (e.aggregate === null) {
         return 'You have not entered enough subjects to calculate this aggregate.';
+      }
+      if (e.basis === 'cutoff') {
+        return rule.outcome === 'satisfied'
+          ? `Your aggregate is ${e.aggregate}, within the latest published cut-off of ${e.maxAggregate}.`
+          : `Your aggregate is ${e.aggregate}; the latest published cut-off is ${e.maxAggregate}.`;
       }
       return rule.outcome === 'satisfied'
         ? `Your aggregate is ${e.aggregate}.`

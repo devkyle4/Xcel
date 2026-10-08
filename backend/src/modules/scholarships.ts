@@ -66,12 +66,15 @@ export async function scholarshipSummaries(
       slug: scholarships.slug,
       name: scholarships.name,
       providerName: scholarships.providerName,
+      logoUrl: scholarships.logoUrl,
       studyLevels: scholarships.studyLevels,
       fields: scholarships.fields,
       eligibilityCategories: scholarships.eligibilityCategories,
       location: scholarships.location,
       coverage: scholarships.coverage,
       status: scholarships.status,
+      providerUrl: scholarships.providerUrl,
+      applicationUrl: current.applicationUrl,
       academicYear: current.academicYear,
       opensOn: current.opensOn,
       closesOn: current.closesOn,
@@ -90,8 +93,9 @@ export async function scholarshipSummaries(
   if (options.limit !== undefined) query.limit(options.limit).offset(options.offset ?? 0);
 
   const rows = await query;
-  return rows.map(({ status, ...row }): ScholarshipSummary => ({
+  return rows.map(({ status, providerUrl, applicationUrl, ...row }): ScholarshipSummary => ({
     ...row,
+    officialUrl: applicationUrl ?? providerUrl,
     availability: scholarshipAvailability(
       { status, opensOn: row.opensOn, closesOn: row.closesOn },
       today,

@@ -1,14 +1,16 @@
 import { ghanaToday, type RequirementGroupInput } from '@xcel/shared';
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, sql } from 'drizzle-orm';
 import type { Database } from '../client';
 import {
   programmeAdmissionCycles,
   programmes,
+  requirementGroups,
   scholarshipCycles,
   scholarshipRequirements,
   scholarships,
   sources,
   universities,
+  userReports,
   verificationRecords,
 } from '../schema';
 import { replaceRequirementTree } from '../../lib/requirements';
@@ -157,6 +159,13 @@ const DEMO_UNIVERSITIES = [
   },
 ];
 
+const DEMO_SCHOLARSHIP_SLUGS = [
+  'demo-merit-scholarship',
+  'demo-women-in-stem-award',
+  'demo-regional-bursary',
+];
+const DEMO_SOURCE_TITLE = 'Demo admissions brochure 2026/2027';
+
 const day = (offset: number) => {
   const d = new Date(`${ghanaToday()}T00:00:00Z`);
   d.setUTCDate(d.getUTCDate() + offset);
@@ -180,7 +189,7 @@ export async function seedDemo({ db }: Database): Promise<{ created: boolean }> 
     const [source] = await tx
       .insert(sources)
       .values({
-        title: 'Demo admissions brochure 2026/2027',
+        title: DEMO_SOURCE_TITLE,
         url: 'https://example.com/demo-brochure',
         publisher: 'Demo data',
         academicYear: '2026/2027',
@@ -313,4 +322,79 @@ export async function seedDemo({ db }: Database): Promise<{ created: boolean }> 
   });
 
   return { created: true };
+}
+
+/**
+ * Removes everything seedDemo created, and nothing else. Published demo
+ * cycles are protected by the history triggers, so those triggers are
+ * switched off only inside this transaction.
+ */
+export async function removeDemo({ db }: Database): Promise<{ removed: boolean }> {
+  return db.transaction(async (tx) => {
+    const unis = await tx
+      .select({ id: universities.id })
+      .from(universities)
+      .where(
+        inArray(
+          universities.slug,
+          DEMO_UNIVERSITIES.map((u) => u.slug),
+        ),
+      );
+    const schols = await tx
+      .select({ id: scholarships.id })
+      .from(scholarships)
+      .where(inArray(scholarships.slug, DEMO_SCHOLARSHIP_SLUGS));
+    if (unis.length === 0 && schols.length === 0) return { removed: false };
+
+    const uniIds = unis.map((u) => u.id);
+    const progIds = uniIds.length
+      ? (
+          await tx
+            .select({ id: programmes.id })
+            .from(programmes)
+            .where(inArray(programmes.universityId, uniIds))
+        ).map((p) => p.id)
+      : [];
+    const cycleIds = progIds.length
+      ? (
+          await tx
+            .select({ id: programmeAdmissionCycles.id })
+            .from(programmeAdmissionCycles)
+            .where(inArray(programmeAdmissionCycles.programmeId, progIds))
+        ).map((c) => c.id)
+      : [];
+    const scholIds = schols.map((s) => s.id);
+    const scholCycleIds = scholIds.length
+      ? (
+          await tx
+            .select({ id: scholarshipCycles.id })
+            .from(scholarshipCycles)
+            .where(inArray(scholarshipCycles.scholarshipId, scholIds))
+        ).map((c) => c.id)
+      : [];
+
+    const entityIds = [...uniIds, ...progIds, ...cycleIds, ...scholIds, ...scholCycleIds];
+    if (entityIds.length) {
+      await tx.delete(verificationRecords).where(inArray(verificationRecords.entityId, entityIds));
+      await tx.delete(userReports).where(inArray(userReports.entityId, entityIds));
+    }
+
+    const frozen = ['programme_admission_cycles', 'requirement_groups', 'requirement_rules'];
+    for (const table of frozen)
+      await tx.execute(sql.raw(`ALTER TABLE ${table} DISABLE TRIGGER USER`));
+    if (cycleIds.length) {
+      await tx.delete(requirementGroups).where(inArray(requirementGroups.cycleId, cycleIds));
+      await tx
+        .delete(programmeAdmissionCycles)
+        .where(inArray(programmeAdmissionCycles.id, cycleIds));
+    }
+    for (const table of frozen)
+      await tx.execute(sql.raw(`ALTER TABLE ${table} ENABLE TRIGGER USER`));
+
+    if (progIds.length) await tx.delete(programmes).where(inArray(programmes.id, progIds));
+    if (scholIds.length) await tx.delete(scholarships).where(inArray(scholarships.id, scholIds));
+    if (uniIds.length) await tx.delete(universities).where(inArray(universities.id, uniIds));
+    await tx.delete(sources).where(eq(sources.title, DEMO_SOURCE_TITLE));
+    return { removed: true };
+  });
 }

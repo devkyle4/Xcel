@@ -44,6 +44,15 @@ const scholarshipFields = {
   slug: slugSchema.optional(),
   providerName: z.string().trim().min(2).max(200),
   providerUrl: url,
+  logoUrl: z
+    .union([
+      z.url({ protocol: /^https$/ }).max(2048),
+      z
+        .string()
+        .regex(/^\/logos\/[a-z0-9-]+\.(png|svg|webp|jpg)$/, 'Use an https URL or a /logos/ path'),
+    ])
+    .nullable()
+    .optional(),
   universityId: z.uuid().nullable().optional(),
   description: text(5000),
   coverage: text(1000),

@@ -163,6 +163,8 @@ export function ProgrammeDetailPage() {
 
             <VerificationLine verification={cycle.verification} />
 
+            {cycle.notes && <p className="text-sm">{cycle.notes}</p>}
+
             {(cycle.applicationDeadline || cycle.applicationUrl) && (
               <div className="flex flex-wrap items-center gap-4">
                 {cycle.applicationDeadline && (

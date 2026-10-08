@@ -209,3 +209,46 @@ describe('manual_review', () => {
     expect(getRuleType('manual_review')!.prepare({ description: '  ' }).success).toBe(false);
   });
 });
+
+describe('aggregate_max with institution grade points and a cut-off basis', () => {
+  const knust = {
+    maxAggregate: 10,
+    basis: 'cutoff',
+    gradePoints: { C5: 4, C6: 4 },
+    components: [
+      { subjectCodes: ['ENGLISH'], count: 1 },
+      { subjectCodes: ['CORE_MATHS'], count: 1 },
+      { subjectCodes: ['INTEGRATED_SCIENCE', 'SOCIAL_STUDIES'], count: 1 },
+      { subjectCodes: ['PHYSICS', 'CHEMISTRY', 'ELECTIVE_MATHS'], count: 3 },
+    ],
+  };
+  const results = {
+    ENGLISH: 'C6',
+    CORE_MATHS: 'C5',
+    INTEGRATED_SCIENCE: 'C4',
+    PHYSICS: 'C6',
+    CHEMISTRY: 'C6',
+    ELECTIVE_MATHS: 'C5',
+  };
+
+  it('uses the overridden points', () => {
+    // Standard points would give 6+5+4+6+6+5 = 32; with C5 and C6 as 4 it is 24.
+    expect(run('aggregate_max', { ...knust, maxAggregate: 24 }, results)).toMatchObject({
+      outcome: 'satisfied',
+      explanation: { aggregate: 24, basis: 'cutoff' },
+    });
+    expect(run('aggregate_max', knust, results)).toMatchObject({
+      outcome: 'unsatisfied',
+      reason: 'aggregate_too_high',
+    });
+  });
+
+  it('rejects unknown grade codes and negative points', () => {
+    expect(
+      getRuleType('aggregate_max')!.prepare({ ...knust, gradePoints: { C5: -1 } }).success,
+    ).toBe(false);
+    expect(getRuleType('aggregate_max')!.prepare({ ...knust, basis: 'rumour' }).success).toBe(
+      false,
+    );
+  });
+});

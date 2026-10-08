@@ -28,6 +28,9 @@ describe('ProgrammeDetailPage', () => {
       'https://knust.example/brochure',
     );
     expect(screen.getByText('Application deadline: 31 August 2026')).toBeInTheDocument();
+    expect(
+      screen.getByText('Cut-off 7 (first choice). Second-choice cut-off: 8.'),
+    ).toBeInTheDocument();
     const apply = screen.getByRole('link', { name: /Apply on the official website/ });
     expect(apply).toHaveAttribute('href', 'https://apply.knust.example');
     expect(apply).toHaveAttribute('rel', 'noopener noreferrer');

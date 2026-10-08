@@ -144,7 +144,7 @@ export const programmeDetail: ProgrammeDetail = {
     applicationOpensOn: null,
     applicationDeadline: '2026-08-31',
     applicationUrl: 'https://apply.knust.example',
-    notes: null,
+    notes: 'Cut-off 7 (first choice). Second-choice cut-off: 8.',
     requirements: engineeringRequirements,
     verification: {
       verifiedAt: '2026-09-01T10:00:00.000Z',
@@ -178,6 +178,7 @@ export const scholarshipSummaries: ScholarshipSummary[] = [
     slug: 'merit-award',
     name: 'Merit Award',
     providerName: 'Ghana Education Trust',
+    logoUrl: '/logos/getfund.webp',
     studyLevels: ['undergraduate'],
     fields: ['Engineering'],
     eligibilityCategories: ['Merit'],
@@ -187,11 +188,13 @@ export const scholarshipSummaries: ScholarshipSummary[] = [
     opensOn: '2026-09-01',
     closesOn: '2026-12-31',
     availability: 'open',
+    officialUrl: 'https://apply.example.org/merit',
   },
   {
     slug: 'old-award',
     name: 'Old Award',
     providerName: 'Fund B',
+    logoUrl: null,
     studyLevels: [],
     fields: [],
     eligibilityCategories: [],
@@ -201,6 +204,7 @@ export const scholarshipSummaries: ScholarshipSummary[] = [
     opensOn: null,
     closesOn: '2026-01-31',
     availability: 'closed',
+    officialUrl: 'https://fundb.example.org',
   },
 ];
 

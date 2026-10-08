@@ -105,7 +105,7 @@ describe('aggregate_max text', () => {
       BIOLOGY: 'C6',
     };
     expect(text(standardAggregate(24), results)).toEqual([
-      'Aggregate of 24 or better (lower is better), counting English Language, Core Mathematics, best of Integrated Science or Social Studies, best 3 elective subjects',
+      'Aggregate of 24 or better (lower is better). Counting English Language, Core Mathematics, best of Integrated Science or Social Studies, best 3 elective subjects',
       'Your aggregate is 36; 24 or better is required.',
     ]);
   });
@@ -146,5 +146,26 @@ describe('describeGroup', () => {
     [atLeast(2, grade('C6', 'PHYSICS'), grade('C6', 'BIOLOGY')), 'Any 2 of the following'],
   ])('%#', (group, heading) => {
     expect(describeGroup(evaluateEligibility(group, {}, catalogue).root!)).toBe(heading);
+  });
+});
+
+describe('aggregate cut-off text', () => {
+  const cutoff = rule('aggregate_max', {
+    maxAggregate: 10,
+    basis: 'cutoff',
+    gradePoints: { C4: 4, C5: 4, C6: 4 },
+    components: [
+      { subjectCodes: ['ENGLISH'], count: 1 },
+      { subjectCodes: ['CORE_MATHS'], count: 1 },
+      { category: 'elective', count: 1 },
+    ],
+  });
+
+  it('says the cut-off can change and lists only points that differ', () => {
+    const [requirement, outcome] = text(cutoff, { ENGLISH: 'C6', CORE_MATHS: 'C5', PHYSICS: 'B3' });
+    expect(requirement).toBe(
+      'Aggregate of 10 or better (lower is better), the latest published cut-off, which can change each year. Counting English Language, Core Mathematics, best elective subject; C5 and C6 count as 4',
+    );
+    expect(outcome).toBe('Your aggregate is 11; the latest published cut-off is 10.');
   });
 });

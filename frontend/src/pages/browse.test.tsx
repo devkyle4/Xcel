@@ -198,13 +198,13 @@ describe('ScholarshipsPage and scholarship detail', () => {
     );
   });
 
-  it('explains that meeting the criteria is not an award, and hides Apply once closed', async () => {
+  it('explains that meeting the criteria is not an award, and links to the provider for the next round once closed', async () => {
     mockApi({
       'GET /api/scholarships/old-award': {
         ...scholarshipSummaries[1],
         description: null,
-        providerUrl: null,
-        applicationUrl: 'https://apply.example.org',
+        providerUrl: 'https://fundb.example.org',
+        applicationUrl: null,
         university: null,
         requirements: ['Ghanaian citizen'],
         verification: null,
@@ -213,8 +213,28 @@ describe('ScholarshipsPage and scholarship detail', () => {
     renderRoute('/scholarships/old-award');
     expect(await screen.findByRole('heading', { level: 1, name: 'Old Award' })).toBeInTheDocument();
     expect(screen.getByText('Closed on 31 January 2026')).toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: /Apply/ })).toBeNull();
+    expect(screen.queryByRole('link', { name: /^Apply/ })).toBeNull();
+    expect(
+      screen.getByRole('link', {
+        name: 'Visit the official website for the next round (opens in a new tab)',
+      }),
+    ).toHaveAttribute('href', 'https://fundb.example.org');
     expect(screen.getByText('Ghanaian citizen')).toBeInTheDocument();
     expect(screen.getByText(/does not mean you will receive this scholarship/)).toBeInTheDocument();
+  });
+
+  it('links every scholarship card to its official site', async () => {
+    mockApi(routes);
+    renderRoute('/scholarships');
+    const open = (await screen.findByRole('link', { name: 'Merit Award' })).closest('article')!;
+    expect(
+      within(open).getByRole('link', {
+        name: 'Apply on the official website (opens in a new tab)',
+      }),
+    ).toHaveAttribute('href', 'https://apply.example.org/merit');
+    const closed = screen.getByRole('link', { name: 'Old Award' }).closest('article')!;
+    expect(
+      within(closed).getByRole('link', { name: 'Official website (opens in a new tab)' }),
+    ).toHaveAttribute('href', 'https://fundb.example.org');
   });
 });
