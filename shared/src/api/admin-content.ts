@@ -1,8 +1,11 @@
 import { z } from 'zod';
 import {
   DEGREE_TYPES,
+  type DegreeType,
   GHANA_REGIONS,
+  type GhanaRegion,
   INSTITUTION_TYPES,
+  type InstitutionType,
   PUBLISH_STATUSES,
   type PublishStatus,
   type ScholarshipStatus,
@@ -147,6 +150,10 @@ export interface AdminVerificationRecord {
   id: string;
   entityType: VerifiableEntityType;
   entityId: string;
+  /** Name of what was checked, e.g. "BSc. Nursing (2026/2027)"; null if it no longer exists. */
+  entityLabel: string | null;
+  /** Where it is edited: the university, or the cycle's programme or scholarship. */
+  ownerId: string | null;
   status: VerificationStatus;
   verifiedAt: string;
   notes: string | null;
@@ -158,6 +165,8 @@ export interface StaleRecord {
   entityType: VerifiableEntityType;
   entityId: string;
   label: string;
+  /** Where it is edited: the university, or the cycle's programme or scholarship. */
+  ownerId: string;
   status: PublishStatus | ScholarshipStatus;
   /** Null if never verified. */
   lastVerifiedAt: string | null;
@@ -170,4 +179,81 @@ export interface StaleReport {
 
 export interface PlatformSettings {
   staleAfterDays: number;
+}
+
+// JSON shapes of the admin catalogue endpoints (timestamps are ISO strings).
+
+interface PublicationFields {
+  status: PublishStatus;
+  publishedAt: string | null;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminUniversity extends PublicationFields {
+  id: string;
+  slug: string;
+  name: string;
+  shortName: string | null;
+  institutionType: InstitutionType;
+  region: GhanaRegion | null;
+  town: string | null;
+  description: string | null;
+  websiteUrl: string | null;
+  admissionsUrl: string | null;
+  logoUrl: string | null;
+}
+
+export interface AdminFacultySchool {
+  id: string;
+  universityId: string;
+  name: string;
+}
+
+export interface AdminUniversityDetail extends AdminUniversity {
+  facultySchools: AdminFacultySchool[];
+  verifications: AdminVerificationRecord[];
+}
+
+export interface AdminProgramme extends PublicationFields {
+  id: string;
+  universityId: string;
+  facultySchoolId: string | null;
+  slug: string;
+  name: string;
+  field: string | null;
+  degreeType: DegreeType;
+  durationYears: number | null;
+  campus: string | null;
+  description: string | null;
+}
+
+export interface AdminProgrammeListItem extends AdminProgramme {
+  universityName: string;
+}
+
+export interface AdminProgrammeDetail extends AdminProgramme {
+  university: { id: string; name: string; slug: string; status: PublishStatus };
+  admissionCycles: {
+    id: string;
+    academicYear: string;
+    version: number;
+    status: PublishStatus;
+    verifiedAt: string | null;
+    publishedAt: string | null;
+  }[];
+}
+
+export interface AdminSource {
+  id: string;
+  url: string | null;
+  title: string;
+  publisher: string | null;
+  academicYear: string | null;
+  retrievedOn: string | null;
+  notes: string | null;
+  createdBy: string | null;
+  createdAt: string;
+  updatedAt: string;
 }

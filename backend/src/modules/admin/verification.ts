@@ -69,6 +69,23 @@ export async function listVerifications(
       sourceTitle: sources.title,
       sourceUrl: sources.url,
       sourceYear: sources.academicYear,
+      // What was checked, and the record an admin edits it on (a cycle's programme or scholarship).
+      entityLabel: sql<string | null>`CASE ${verificationRecords.entityType}
+        WHEN 'university' THEN (SELECT u.name FROM universities u WHERE u.id = ${verificationRecords.entityId})
+        WHEN 'programme_admission_cycle' THEN (
+          SELECT p.name || ' (' || c.academic_year || ')' FROM programme_admission_cycles c
+          JOIN programmes p ON p.id = c.programme_id WHERE c.id = ${verificationRecords.entityId})
+        ELSE (
+          SELECT s.name || ' (' || sc.academic_year || ')' FROM scholarship_cycles sc
+          JOIN scholarships s ON s.id = sc.scholarship_id WHERE sc.id = ${verificationRecords.entityId})
+        END`,
+      ownerId: sql<string | null>`CASE ${verificationRecords.entityType}
+        WHEN 'university' THEN ${verificationRecords.entityId}
+        WHEN 'programme_admission_cycle' THEN (
+          SELECT c.programme_id FROM programme_admission_cycles c WHERE c.id = ${verificationRecords.entityId})
+        ELSE (
+          SELECT sc.scholarship_id FROM scholarship_cycles sc WHERE sc.id = ${verificationRecords.entityId})
+        END`,
     })
     .from(verificationRecords)
     .leftJoin(users, eq(users.id, verificationRecords.verifiedBy))
@@ -82,6 +99,8 @@ export async function listVerifications(
     id: r.id,
     entityType: r.entityType,
     entityId: r.entityId,
+    entityLabel: r.entityLabel,
+    ownerId: r.ownerId,
     status: r.status,
     verifiedAt: r.verifiedAt.toISOString(),
     notes: r.notes,
@@ -106,23 +125,27 @@ export async function staleRecords(db: Db, staleAfterDays: number): Promise<Stal
     entity_type: VerifiableEntityType;
     entity_id: string;
     label: string;
+    owner_id: string;
     status: StaleRecord['status'];
     last_verified_at: Date | null;
   }>(sql`
-    SELECT 'university' AS entity_type, u.id AS entity_id, u.name AS label, u.status::text AS status,
+    SELECT 'university' AS entity_type, u.id AS entity_id, u.name AS label, u.id AS owner_id,
+           u.status::text AS status,
            lv.verified_at AS last_verified_at
     FROM universities u
     ${latestVerified('university', sql`u.id`)}
     WHERE u.status IN ('verified', 'published') AND ${isStale}
     UNION ALL
-    SELECT 'programme_admission_cycle', c.id, p.name || ' (' || c.academic_year || ')', c.status::text,
+    SELECT 'programme_admission_cycle', c.id, p.name || ' (' || c.academic_year || ')', p.id,
+           c.status::text,
            lv.verified_at
     FROM programme_admission_cycles c
     JOIN programmes p ON p.id = c.programme_id
     ${latestVerified('programme_admission_cycle', sql`c.id`)}
     WHERE c.status IN ('verified', 'published') AND ${isStale}
     UNION ALL
-    SELECT 'scholarship_cycle', sc.id, s.name || ' (' || sc.academic_year || ')', s.status::text,
+    SELECT 'scholarship_cycle', sc.id, s.name || ' (' || sc.academic_year || ')', s.id,
+           s.status::text,
            lv.verified_at
     FROM scholarships s
     JOIN LATERAL (
@@ -137,6 +160,7 @@ export async function staleRecords(db: Db, staleAfterDays: number): Promise<Stal
     entityType: r.entity_type,
     entityId: r.entity_id,
     label: r.label,
+    ownerId: r.owner_id,
     status: r.status,
     lastVerifiedAt: r.last_verified_at ? new Date(r.last_verified_at).toISOString() : null,
   }));

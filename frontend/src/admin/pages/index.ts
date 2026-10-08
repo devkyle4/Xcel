@@ -1,0 +1,9 @@
+export { DashboardPage } from './DashboardPage';
+export { LoginPage } from './LoginPage';
+export { EditProgrammePage, NewProgrammePage } from './ProgrammePage';
+export { ProgrammesPage } from './ProgrammesPage';
+export { EditSourcePage, NewSourcePage, SourcesPage } from './SourcesPage';
+export { UniversitiesPage } from './UniversitiesPage';
+export { EditUniversityPage, NewUniversityPage } from './UniversityPage';
+export { VerificationPage } from './VerificationPage';
+export { AdminNotFoundPage } from './AdminNotFoundPage';

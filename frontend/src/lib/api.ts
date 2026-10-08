@@ -44,14 +44,24 @@ export function createQueryClient() {
   });
 }
 
-export async function apiPost<T>(path: string, body: unknown): Promise<T> {
+/** Sends a JSON write request. Resolves to undefined for "204 No Content". */
+export async function apiSend<T>(
+  method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
+  path: string,
+  body?: unknown,
+): Promise<T> {
   const res = await fetch(apiUrl(path), {
-    method: 'POST',
-    headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
+    method,
+    headers: {
+      Accept: 'application/json',
+      ...(body !== undefined && { 'Content-Type': 'application/json' }),
+    },
+    ...(body !== undefined && { body: JSON.stringify(body) }),
   });
   if (!res.ok) {
     throw new ApiRequestError(res.status, (await res.json().catch(() => null)) as ApiError | null);
   }
-  return (await res.json()) as T;
+  return (res.status === 204 ? undefined : await res.json()) as T;
 }
+
+export const apiPost = <T>(path: string, body: unknown) => apiSend<T>('POST', path, body);

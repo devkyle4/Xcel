@@ -410,6 +410,8 @@ describe('sources and verification', () => {
       expect.objectContaining({
         status: 'rejected',
         notes: 'Website was down',
+        entityLabel: 'History University',
+        ownerId: uni.id,
         verifiedBy: { id: adminId, name: 'Kofi Content' },
       }),
     ]);
@@ -441,6 +443,17 @@ describe('sources and verification', () => {
       .from(programmeAdmissionCycles)
       .where(eq(programmeAdmissionCycles.id, cycle!.id));
     expect(after?.verifiedAt?.toISOString()).toBe('2026-09-01T09:00:00.000Z');
+
+    const history = await api<{ items: unknown[] }>(
+      'GET',
+      `/api/admin/verification?entityType=programme_admission_cycle&entityId=${cycle!.id}`,
+    );
+    expect(history.body.items).toEqual([
+      expect.objectContaining({
+        entityLabel: 'BSc Physics (2026/2027)',
+        ownerId: programme.body.id,
+      }),
+    ]);
   });
 });
 
@@ -463,10 +476,11 @@ describe('stale records', () => {
 
     const stale = await api<{
       staleAfterDays: number;
-      items: { entityId: string; label: string }[];
+      items: { entityId: string; label: string; ownerId: string }[];
     }>('GET', '/api/admin/verification/stale');
     expect(stale.body.staleAfterDays).toBe(365);
     expect(stale.body.items.map((i) => i.entityId)).toContain(uni.id);
+    expect(stale.body.items.find((i) => i.entityId === uni.id)?.ownerId).toBe(uni.id);
 
     try {
       const settings = await api('PATCH', '/api/admin/settings', { staleAfterDays: 500 });

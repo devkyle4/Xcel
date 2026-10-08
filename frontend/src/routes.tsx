@@ -1,4 +1,5 @@
 import type { RouteObject } from 'react-router';
+import { adminRoutes } from './admin/routes';
 import { AppLayout } from './layout/AppLayout';
 import { CHECK_ELIGIBILITY_PATH } from './config/navigation';
 import { ErrorPage } from './pages/ErrorPage';
@@ -87,5 +88,14 @@ export const routes: RouteObject[] = [
         lazy: async () => ({ Component: (await import('./pages/NotFoundPage')).NotFoundPage }),
       },
     ],
+  },
+  {
+    errorElement: <ErrorPage />,
+    hydrateFallbackElement: (
+      <p role="status" className="p-8">
+        Loading…
+      </p>
+    ),
+    children: adminRoutes,
   },
 ];

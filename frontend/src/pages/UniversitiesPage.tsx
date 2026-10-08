@@ -24,7 +24,7 @@ export function UniversitiesPage() {
   return (
     <PageContainer
       title="Universities"
-      intro="Browse universities and other tertiary institutions, and the programmes they offer."
+      intro="Browse universities and other tertiary institutions in Ghana."
     >
       <SearchFilters
         label="Search universities"
@@ -69,10 +69,10 @@ export function UniversitiesPage() {
               No universities match your search. Try different words, or clear the filters.
             </EmptyState>
           ) : (
-            <ul className="grid gap-3 md:grid-cols-2">
+            <ul className="space-y-5">
               {list.data.items.map((u) => (
                 <li key={u.slug}>
-                  <article className="h-full rounded-lg border border-blue-100 bg-white p-4">
+                  <article>
                     <h3 className="text-lg font-semibold">
                       <Link to={`/universities/${u.slug}`}>{u.name}</Link>
                     </h3>
