@@ -12,12 +12,12 @@ describe('HomePage', () => {
     expect(cta).toHaveClass('bg-green-700');
   });
 
-  it('links to programmes, scholarships and mentors', () => {
+  it('links to universities, scholarships and mentors', () => {
     renderRoute('/');
     const main = screen.getByRole('main');
-    expect(within(main).getByRole('link', { name: 'Explore programmes' })).toHaveAttribute(
+    expect(within(main).getByRole('link', { name: 'Explore universities' })).toHaveAttribute(
       'href',
-      '/programmes',
+      '/universities',
     );
     expect(within(main).getByRole('link', { name: 'Find scholarships' })).toHaveAttribute(
       'href',

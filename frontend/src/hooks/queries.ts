@@ -7,8 +7,6 @@ import {
   type MentorSummary,
   type Paginated,
   type ProgrammeDetail,
-  type ProgrammeFilterOptions,
-  type ProgrammeSummary,
   type ScholarshipDetail,
   type ScholarshipFilterOptions,
   type ScholarshipSummary,
@@ -67,20 +65,6 @@ export const useProgramme = (id: string, year: string | null) =>
   });
 
 type QueryParams = Record<string, string | number | undefined>;
-
-export const useProgrammeList = (params: QueryParams) =>
-  useQuery({
-    queryKey: ['programmes', params],
-    queryFn: () => apiGet<Paginated<ProgrammeSummary>>('/programmes', params),
-    placeholderData: keepPreviousData,
-  });
-
-export const useProgrammeFilters = () =>
-  useQuery({
-    queryKey: ['programme-filters'],
-    queryFn: () => apiGet<ProgrammeFilterOptions>('/programmes/filters'),
-    staleTime: 10 * 60_000,
-  });
 
 export const useUniversityList = (params: QueryParams) =>
   useQuery({

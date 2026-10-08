@@ -1,5 +1,6 @@
 import { useParams } from 'react-router';
 import { ScholarshipCard } from '../components/browse/ScholarshipCard';
+import { UniversityProgrammes } from '../components/browse/UniversityProgrammes';
 import { ExternalLinkButton } from '../components/ExternalLinkButton';
 import { LoadError, Loading } from '../components/LoadState';
 import { PageContainer } from '../components/PageContainer';
@@ -52,6 +53,8 @@ export function UniversityDetailPage() {
           )}
         </div>
       )}
+
+      <UniversityProgrammes programmes={u.programmes} />
 
       {u.scholarships.length > 0 && (
         <section aria-labelledby="scholarships-heading" className="space-y-3">

@@ -1,4 +1,4 @@
-import type { RouteObject } from 'react-router';
+import { redirect, type RouteObject } from 'react-router';
 import { adminRoutes } from './admin/routes';
 import { AppLayout } from './layout/AppLayout';
 import { CHECK_ELIGIBILITY_PATH } from './config/navigation';
@@ -42,10 +42,8 @@ export const routes: RouteObject[] = [
           Component: (await import('./pages/ProgrammeDetailPage')).ProgrammeDetailPage,
         }),
       },
-      {
-        path: 'programmes',
-        lazy: async () => ({ Component: (await import('./pages/ProgrammesPage')).ProgrammesPage }),
-      },
+      // There is no programme browse page: programmes are listed on each university's page.
+      { path: 'programmes', loader: () => redirect('/universities') },
       {
         path: 'universities',
         lazy: async () => ({

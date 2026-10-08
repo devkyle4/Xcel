@@ -7,10 +7,10 @@ import { CHECK_ELIGIBILITY_PATH } from '../config/navigation';
 
 const EXPLORE = [
   {
-    to: '/programmes',
+    to: '/universities',
     Icon: BookOpen,
-    title: 'Explore programmes',
-    text: 'Search university programmes and see the admission requirements for each academic year.',
+    title: 'Explore universities',
+    text: 'See each university’s programmes and their admission requirements for the academic year.',
   },
   {
     to: '/scholarships',
@@ -59,8 +59,8 @@ export function HomePage() {
             <ButtonLink to={CHECK_ELIGIBILITY_PATH}>
               Check your eligibility <ArrowRight aria-hidden="true" className="size-5" />
             </ButtonLink>
-            <ButtonLink to="/programmes" variant="secondary">
-              Browse programmes
+            <ButtonLink to="/universities" variant="secondary">
+              Browse universities
             </ButtonLink>
           </div>
           <div className="mt-8 max-w-2xl">

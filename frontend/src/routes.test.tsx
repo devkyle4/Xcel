@@ -3,7 +3,6 @@ import { renderRoute } from './test/render';
 
 describe('routes', () => {
   it.each([
-    ['/programmes', 'Programmes'],
     ['/universities', 'Universities'],
     ['/scholarships', 'Scholarships'],
     ['/mentors', 'Find a Mentor'],

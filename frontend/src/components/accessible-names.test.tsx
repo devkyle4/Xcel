@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react';
-import { catalogueRoutes, page, programmeSummaries } from '../test/fixtures';
+import { catalogueRoutes, page, scholarshipSummaries } from '../test/fixtures';
 import { mockApi } from '../test/mock-api';
 import { renderRoute } from '../test/render';
 
@@ -7,12 +7,8 @@ import { renderRoute } from '../test/render';
 // text are separate words ("Next page", not "Nextpage").
 describe('accessible names', () => {
   it('keeps a space between visible and screen-reader-only text', async () => {
-    mockApi({
-      ...catalogueRoutes,
-      'GET /api/programmes/filters': { fields: [], universities: [] },
-      'GET /api/programmes': page(programmeSummaries, 45),
-    });
-    renderRoute('/programmes');
+    mockApi({ 'GET /api/scholarships': page(scholarshipSummaries, 45) });
+    renderRoute('/scholarships');
     expect(await screen.findByRole('button', { name: 'Next page' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Previous page' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Xcel – home' })).toBeInTheDocument();
