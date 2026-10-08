@@ -7,6 +7,7 @@ import { academicAdminRoutes } from './academic';
 import { adminAuthRoutes } from './auth';
 import { cycleAdminRoutes } from './cycles';
 import { dashboardRoutes } from './dashboard';
+import { mentorAdminRoutes } from './mentors';
 import { programmeAdminRoutes } from './programmes';
 import { reportAdminRoutes } from './reports';
 import { scholarshipAdminRoutes } from './scholarships';
@@ -45,6 +46,7 @@ export function adminRoutes(db: () => Db) {
   admin.route('/', academicAdminRoutes(db));
   admin.route('/reports', reportAdminRoutes(db));
   admin.route('/dashboard', dashboardRoutes(db));
+  admin.route('/mentors', mentorAdminRoutes(db));
 
   return admin;
 }

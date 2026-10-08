@@ -462,7 +462,12 @@ describe('dashboard', () => {
     expect(body.programmes.published).toBeGreaterThanOrEqual(1);
     expect(body.scholarships.published).toBeGreaterThanOrEqual(1);
     expect(body.openReports).toBeGreaterThanOrEqual(6);
-    expect(body.mentors).toEqual({ active: 0, inactive: 0, archived: 0 });
+    // Other test files may create mentors, so check the shape rather than exact counts.
+    expect(body.mentors).toEqual({
+      active: expect.any(Number),
+      inactive: expect.any(Number),
+      archived: expect.any(Number),
+    });
     expect(body.staleRecords).toBeGreaterThanOrEqual(1);
   });
 });

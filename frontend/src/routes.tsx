@@ -4,14 +4,7 @@ import { CHECK_ELIGIBILITY_PATH } from './config/navigation';
 import { ErrorPage } from './pages/ErrorPage';
 import { HomePage } from './pages/HomePage';
 
-/** Code-split page: only downloaded when visited, which keeps the first load small. */
-const comingSoon =
-  (title: string, intro: string): RouteObject['lazy'] =>
-  async () => {
-    const { ComingSoonPage } = await import('./pages/ComingSoonPage');
-    return { Component: () => <ComingSoonPage title={title} intro={intro} /> };
-  };
-
+/** Pages are code-split: each is only downloaded when visited, which keeps the first load small. */
 const infoPage =
   (name: 'AboutPage' | 'DisclaimerPage' | 'ContactPage'): RouteObject['lazy'] =>
   async () => ({
@@ -78,7 +71,13 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'mentors',
-        lazy: comingSoon('Find a Mentor', 'Request one-on-one guidance from a mentor.'),
+        lazy: async () => ({ Component: (await import('./pages/MentorsPage')).MentorsPage }),
+      },
+      {
+        path: 'mentors/:slug',
+        lazy: async () => ({
+          Component: (await import('./pages/MentorProfilePage')).MentorProfilePage,
+        }),
       },
       { path: 'about', lazy: infoPage('AboutPage') },
       { path: 'disclaimer', lazy: infoPage('DisclaimerPage') },

@@ -1,5 +1,4 @@
 import { useParams } from 'react-router';
-import { ProgrammeCard } from '../components/browse/ProgrammeCard';
 import { ScholarshipCard } from '../components/browse/ScholarshipCard';
 import { ExternalLinkButton } from '../components/ExternalLinkButton';
 import { LoadError, Loading } from '../components/LoadState';
@@ -53,23 +52,6 @@ export function UniversityDetailPage() {
           )}
         </div>
       )}
-
-      <section aria-labelledby="programmes-heading" className="space-y-3">
-        <h2 id="programmes-heading" className="text-2xl font-bold">
-          Programmes ({u.programmes.length})
-        </h2>
-        {u.programmes.length === 0 ? (
-          <p>No programmes have been published for this institution yet.</p>
-        ) : (
-          <ul className="space-y-3">
-            {u.programmes.map((p) => (
-              <li key={p.id}>
-                <ProgrammeCard programme={p} />
-              </li>
-            ))}
-          </ul>
-        )}
-      </section>
 
       {u.scholarships.length > 0 && (
         <section aria-labelledby="scholarships-heading" className="space-y-3">

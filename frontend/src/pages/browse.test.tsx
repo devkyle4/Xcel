@@ -125,7 +125,7 @@ describe('UniversitiesPage and university detail', () => {
     expect(screen.getByText('Public university · Kumasi, Ashanti')).toBeInTheDocument();
   });
 
-  it('shows a university with its programmes, scholarships and links', async () => {
+  it('shows a university with its scholarships and links, but not its programmes', async () => {
     mockApi({
       'GET /api/universities/knust': {
         slug: 'knust',
@@ -150,7 +150,9 @@ describe('UniversitiesPage and university detail', () => {
       'href',
       'https://knust.example',
     );
-    expect(screen.getByRole('link', { name: 'BSc Computer Engineering' })).toBeInTheDocument();
+    // University pages do not list programmes.
+    expect(screen.queryByRole('link', { name: 'BSc Computer Engineering' })).toBeNull();
+    expect(screen.queryByRole('heading', { name: /Programmes/ })).toBeNull();
     expect(screen.getByRole('link', { name: 'Merit Award' })).toBeInTheDocument();
     expect(
       screen.getByRole('button', { name: 'Report incorrect information' }),

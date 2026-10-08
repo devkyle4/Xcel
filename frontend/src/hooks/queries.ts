@@ -3,6 +3,8 @@ import {
   type EligibilityBundle,
   type GradeInfo,
   indexCatalogue,
+  type MentorDetail,
+  type MentorSummary,
   type Paginated,
   type ProgrammeDetail,
   type ProgrammeFilterOptions,
@@ -112,3 +114,13 @@ export const useScholarship = (slug: string) =>
     queryKey: ['scholarship', slug],
     queryFn: () => apiGet<ScholarshipDetail>(`/scholarships/${slug}`),
   });
+
+export const useMentorList = (params: QueryParams) =>
+  useQuery({
+    queryKey: ['mentors', params],
+    queryFn: () => apiGet<Paginated<MentorSummary>>('/mentors', params),
+    placeholderData: keepPreviousData,
+  });
+
+export const useMentor = (slug: string) =>
+  useQuery({ queryKey: ['mentor', slug], queryFn: () => apiGet<MentorDetail>(`/mentors/${slug}`) });

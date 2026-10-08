@@ -121,7 +121,7 @@ Name:   [name]
 Phone:  [phone]
 Email:  [email or "Not provided"]
 Topic:  [topic]
-Sent via the SHS Discovery Platform
+Sent via Xcel
 ```
 
 - Reply-to = student email when provided.
@@ -265,13 +265,17 @@ destructive action.
   `NotEligible`; a requirement that cannot be evaluated gives `NeedsReview`.
 - Mentor verification (OI-04): none. The administrator adds mentors directly;
   mentors are `active`, `inactive` or `archived`.
+- Email provider (OI-03): Resend, called from the backend. Without an API key
+  (local development) emails go to an in-memory outbox and are never logged.
+- CAPTCHA: Cloudflare Turnstile, verified server-side.
+- Mentor email footer: "Sent via Xcel" (replaces "Sent via the SHS Discovery Platform").
+- Mentor response time (OI-05): not shown to students.
+- Platform name: Xcel.
 
 ## Open questions (ask before implementing)
 
 - How many days before a record is flagged as stale (OI-02). Stored as the
   `stale_after_days` setting, provisionally 365.
-- Email provider for mentor session requests (OI-03).
-- Expected mentor response time shown to students, if any (OI-05).
 
 ## Build workflow (chunked)
 
