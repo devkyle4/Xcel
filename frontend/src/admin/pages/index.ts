@@ -7,3 +7,4 @@ export { UniversitiesPage } from './UniversitiesPage';
 export { EditUniversityPage, NewUniversityPage } from './UniversityPage';
 export { VerificationPage } from './VerificationPage';
 export { AdminNotFoundPage } from './AdminNotFoundPage';
+export { CyclePage } from './CyclePage';

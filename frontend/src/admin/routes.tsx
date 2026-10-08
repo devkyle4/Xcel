@@ -20,6 +20,7 @@ export const adminRoutes: RouteObject[] = [
       { path: 'programmes', lazy: page(pages, 'ProgrammesPage') },
       { path: 'programmes/new', lazy: page(pages, 'NewProgrammePage') },
       { path: 'programmes/:id', lazy: page(pages, 'EditProgrammePage') },
+      { path: 'cycles/:id', lazy: page(pages, 'CyclePage') },
       { path: 'sources', lazy: page(pages, 'SourcesPage') },
       { path: 'sources/new', lazy: page(pages, 'NewSourcePage') },
       { path: 'sources/:id', lazy: page(pages, 'EditSourcePage') },

@@ -58,11 +58,19 @@ export function useAdminList<T>(path: string, params: Params) {
 export function useAdminMutation<TBody, TResult = unknown>(
   method: 'POST' | 'PATCH' | 'PUT' | 'DELETE',
   path: string,
+  options: {
+    /**
+     * Runs before data is refetched, e.g. to leave the page of a deleted
+     * record (which would otherwise refetch, fail and unmount first).
+     */
+    onSuccessFirst?: (result: TResult) => void;
+  } = {},
 ) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (body: TBody) => apiSend<TResult>(method, path, body),
-    onSuccess: async () => {
+    onSuccess: async (result) => {
+      options.onSuccessFirst?.(result);
       await queryClient.invalidateQueries({
         predicate: (q) => q.queryKey[0] === 'admin' && q.queryKey[1] !== ME_KEY[1],
       });

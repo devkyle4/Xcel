@@ -169,13 +169,15 @@ payments, direct application submission, scraping.
 
 ## Navigation
 
-Logo (links home) + 5 items, in this order:
+Logo (links home) + 4 items, in this order:
 
-1. Programmes
-2. Universities
-3. Scholarships
-4. Find a Mentor
-5. Check Eligibility — primary CTA, styled as a green button
+1. Universities
+2. Scholarships
+3. Find a Mentor
+4. Check Eligibility — primary CTA, styled as a green button
+
+Programmes is not in the navbar (decided 2026-10-08); students reach
+programmes through the homepage and eligibility results.
 
 Admin login is not in the public nav (use `/admin`). About, disclaimer and
 contact go in the footer. On mobile, collapse links into a menu but keep

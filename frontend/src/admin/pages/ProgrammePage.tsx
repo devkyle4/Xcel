@@ -3,11 +3,12 @@ import {
   type AdminProgrammeDetail,
   type AdminUniversity,
   type AdminUniversityDetail,
+  cycleCreateSchema,
   DEGREE_TYPES,
   programmeCreateSchema,
   programmeUpdateSchema,
 } from '@xcel/shared';
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Plus } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router';
 import { LoadError, Loading } from '../../components/LoadState';
@@ -174,26 +175,7 @@ export function EditProgrammePage() {
           }}
         />
       </Panel>
-      <Panel title="Admission cycles">
-        {p.admissionCycles.length === 0 ? (
-          <p>No admission cycles yet.</p>
-        ) : (
-          <ul className="divide-y divide-blue-100">
-            {p.admissionCycles.map((c) => (
-              <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
-                <span>
-                  {c.academicYear}, version {c.version}
-                  {c.publishedAt && (
-                    <span className="block text-sm">Published {formatDate(c.publishedAt)}</span>
-                  )}
-                </span>
-                <PublishStatusBadge status={c.status} />
-              </li>
-            ))}
-          </ul>
-        )}
-        <p className="text-sm">Editing admission cycles and requirements is not available yet.</p>
-      </Panel>
+      <CyclesPanel programme={p} />
     </AdminPage>
   );
 }
@@ -306,5 +288,70 @@ function ProgrammeForm({
         {saving ? 'Saving…' : submitLabel}
       </Button>
     </form>
+  );
+}
+
+/** The programme's admission cycles, newest first, and a form to start a new one. */
+function CyclesPanel({ programme: p }: { programme: AdminProgrammeDetail }) {
+  const navigate = useNavigate();
+  const [year, setYear] = useState('');
+  const [error, setError] = useState<string>();
+  const create = useAdminMutation<unknown, { id: string }>(
+    'POST',
+    `/admin/programmes/${p.id}/cycles`,
+  );
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    const result = validate(cycleCreateSchema, { academicYear: year.trim() });
+    if (!result.data) return setError(Object.values(result.errors)[0]);
+    setError(undefined);
+    create.mutate(result.data, {
+      onSuccess: (cycle) => void navigate(`/admin/cycles/${cycle.id}`, { state: SAVED }),
+      onError: (e) => setError(Object.values(requestErrors(e))[0]),
+    });
+  };
+
+  return (
+    <Panel title="Admission cycles">
+      <p className="text-sm">
+        Requirements belong to an admission cycle (an academic year). Published cycles never change;
+        updates are made in a new version.
+      </p>
+      {p.admissionCycles.length === 0 ? (
+        <p>No admission cycles yet.</p>
+      ) : (
+        <ul className="divide-y divide-blue-100">
+          {p.admissionCycles.map((c) => (
+            <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+              <span>
+                <Link to={`/admin/cycles/${c.id}`} className="font-semibold">
+                  {c.academicYear}, version {c.version}
+                </Link>
+                {c.publishedAt && (
+                  <span className="block text-sm">Published {formatDate(c.publishedAt)}</span>
+                )}
+              </span>
+              <PublishStatusBadge status={c.status} />
+            </li>
+          ))}
+        </ul>
+      )}
+      <form onSubmit={submit} noValidate className="flex flex-wrap items-end gap-2">
+        <div className="w-56">
+          <TextField
+            label="New cycle for academic year"
+            required
+            hint="e.g. 2027/2028"
+            value={year}
+            onChange={setYear}
+            error={error}
+          />
+        </div>
+        <Button type="submit" variant="secondary" disabled={create.isPending}>
+          <Plus aria-hidden="true" className="size-5" /> Add cycle
+        </Button>
+      </form>
+    </Panel>
   );
 }

@@ -3,13 +3,12 @@ import userEvent from '@testing-library/user-event';
 import { renderRoute } from '../test/render';
 
 describe('Navbar', () => {
-  it('shows the logo and the five items in order, with Check Eligibility last', () => {
+  it('shows the logo and the four items in order, with Check Eligibility last', () => {
     renderRoute('/');
     const nav = screen.getByRole('navigation', { name: 'Main' });
     const links = within(nav).getAllByRole('link');
     expect(links.map((l) => l.textContent)).toEqual([
       'Xcel – home',
-      'Programmes',
       'Universities',
       'Scholarships',
       'Find a Mentor',
@@ -50,7 +49,7 @@ describe('Navbar', () => {
       within(menu)
         .getAllByRole('link')
         .map((l) => l.textContent),
-    ).toEqual(['Programmes', 'Universities', 'Scholarships', 'Find a Mentor']);
+    ).toEqual(['Universities', 'Scholarships', 'Find a Mentor']);
 
     await user.keyboard('{Escape}');
     expect(document.getElementById('mobile-menu')).toBeNull();

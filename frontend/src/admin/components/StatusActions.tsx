@@ -36,8 +36,14 @@ export function StatusActions({
   status,
   path,
   name,
+  allowed = () => true,
+  notes = {},
 }: {
   status: PublishStatus;
+  /** Further limits on the workflow for this kind of record. */
+  allowed?: (to: PublishStatus) => boolean;
+  /** Extra explanation in the confirmation for a step, e.g. what publishing replaces. */
+  notes?: Partial<Record<PublishStatus, string>>;
   /** The record's admin path; the change is posted to `${path}/status`. */
   path: string;
   name: string;
@@ -55,7 +61,7 @@ export function StatusActions({
         <span className="font-semibold">Status:</span> <PublishStatusBadge status={status} />
       </p>
       <div className="flex flex-wrap gap-3">
-        {PUBLISH_TRANSITIONS[status].map((to) => (
+        {PUBLISH_TRANSITIONS[status].filter(allowed).map((to) => (
           <Button
             key={to}
             variant={to === 'published' ? 'primary' : 'secondary'}
@@ -79,6 +85,7 @@ export function StatusActions({
           }}
         >
           <p>{CONFIRM[confirming]}</p>
+          {notes[confirming] && <p>{notes[confirming]}</p>}
           <FormError message={requestErrors(change.error)['']} />
         </ConfirmDialog>
       )}

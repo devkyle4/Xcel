@@ -71,8 +71,8 @@ export function VerificationList({ records }: { records: AdminVerificationRecord
               {r.source.url ? (
                 <a href={r.source.url} target="_blank" rel="noopener noreferrer">
                   {r.source.title}
-                  <ExternalLink aria-hidden="true" className="ml-1 inline size-3.5" />
-                  <span className="sr-only"> (opens in a new tab)</span>
+                  <ExternalLink aria-hidden="true" className="ml-1 inline size-3.5" />{' '}
+                  <span className="sr-only">(opens in a new tab)</span>
                 </a>
               ) : (
                 r.source.title
