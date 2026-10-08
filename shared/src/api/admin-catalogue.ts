@@ -8,6 +8,7 @@ import {
   SCHOLARSHIP_STATUSES,
   type ScholarshipStatus,
   STUDY_LEVELS,
+  type StudyLevel,
   SUBJECT_CATEGORIES,
   type SubjectCategory,
 } from '../domain';
@@ -107,6 +108,32 @@ export const scholarshipRequirementsInputSchema = z
       .max(50),
   })
   .strict();
+
+export interface AdminScholarship {
+  id: string;
+  slug: string;
+  name: string;
+  providerName: string;
+  providerUrl: string | null;
+  logoUrl: string | null;
+  universityId: string | null;
+  description: string | null;
+  coverage: string | null;
+  studyLevels: StudyLevel[];
+  fields: string[];
+  eligibilityCategories: string[];
+  location: string | null;
+  status: ScholarshipStatus;
+  publishedAt: string | null;
+  archivedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AdminScholarshipDetail extends AdminScholarship {
+  /** Newest academic year first; the first is the current cycle. */
+  cycles: AdminScholarshipCycle[];
+}
 
 export interface AdminScholarshipCycle {
   id: string;

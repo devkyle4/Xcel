@@ -77,7 +77,7 @@ export function DashboardPage() {
               <Flag aria-hidden="true" className="size-5 text-blue-700" />
               <span>
                 {d.openReports} open error {d.openReports === 1 ? 'report' : 'reports'} from the
-                public.
+                public. <Link to="/admin/reports">Review reports</Link>
               </span>
             </li>
           )}
@@ -87,7 +87,10 @@ export function DashboardPage() {
               <span>
                 {d.scholarships.overdue} published{' '}
                 {d.scholarships.overdue === 1 ? 'scholarship has' : 'scholarships have'} a closing
-                date in the past.
+                date in the past.{' '}
+                <Link to="/admin/scholarships?status=published" className="text-red-800">
+                  Review scholarships
+                </Link>
               </span>
             </li>
           )}
@@ -99,7 +102,9 @@ export function DashboardPage() {
         <StatusCounts title="Programmes" counts={d.programmes} to="/admin/programmes" />
         <StatusCounts title="Admission cycles" counts={d.admissionCycles} />
         <div className="rounded-lg border border-blue-100 bg-white p-4">
-          <h2 className="text-lg font-bold">Scholarships</h2>
+          <h2 className="text-lg font-bold">
+            <Link to="/admin/scholarships">Scholarships</Link>
+          </h2>
           <dl className="mt-2 space-y-0.5 text-sm">
             {(['published', 'draft', 'expired', 'archived'] as const).map((s) => (
               <div key={s} className="flex justify-between gap-2">
@@ -110,7 +115,9 @@ export function DashboardPage() {
           </dl>
         </div>
         <div className="rounded-lg border border-blue-100 bg-white p-4">
-          <h2 className="text-lg font-bold">Mentors</h2>
+          <h2 className="text-lg font-bold">
+            <Link to="/admin/mentors">Mentors</Link>
+          </h2>
           <dl className="mt-2 space-y-0.5 text-sm">
             {(['active', 'inactive', 'archived'] as const).map((s) => (
               <div key={s} className="flex justify-between gap-2">

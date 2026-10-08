@@ -1,11 +1,7 @@
 import { PUBLISH_TRANSITIONS, type PublishStatus } from '@xcel/shared';
-import { useState } from 'react';
-import { Button } from '../../components/ui/Button';
-import { requestErrors, useAdminMutation } from '../api';
-import { ConfirmDialog } from './ConfirmDialog';
-import { FormError } from './fields';
 import { PUBLISH_STATUS_LABELS } from '../labels';
 import { PublishStatusBadge } from './PublishStatusBadge';
+import { WorkflowActions } from './WorkflowActions';
 
 const ACTION_LABELS: Partial<Record<`${PublishStatus}>${PublishStatus}`, string>> = {
   'draft>needs_verification': 'Send for verification',
@@ -28,10 +24,7 @@ const CONFIRM: Partial<Record<PublishStatus, string>> = {
 const actionLabel = (from: PublishStatus, to: PublishStatus) =>
   ACTION_LABELS[`${from}>${to}`] ?? (to === 'archived' ? 'Archive' : PUBLISH_STATUS_LABELS[to]);
 
-/**
- * Current status and the workflow steps allowed from it. The server enforces
- * the same workflow and may still refuse (e.g. no verification record yet).
- */
+/** Publishing workflow steps for universities, programmes and admission cycles. */
 export function StatusActions({
   status,
   path,
@@ -40,55 +33,32 @@ export function StatusActions({
   notes = {},
 }: {
   status: PublishStatus;
+  path: string;
+  name: string;
   /** Further limits on the workflow for this kind of record. */
   allowed?: (to: PublishStatus) => boolean;
   /** Extra explanation in the confirmation for a step, e.g. what publishing replaces. */
   notes?: Partial<Record<PublishStatus, string>>;
-  /** The record's admin path; the change is posted to `${path}/status`. */
-  path: string;
-  name: string;
 }) {
-  const change = useAdminMutation<{ status: PublishStatus }>('POST', `${path}/status`);
-  const [confirming, setConfirming] = useState<PublishStatus | null>(null);
-
-  const go = (to: PublishStatus) => {
-    change.mutate({ status: to }, { onSuccess: () => setConfirming(null) });
-  };
-
+  const transitions = Object.fromEntries(
+    Object.entries(PUBLISH_TRANSITIONS).map(([from, to]) => [from, to.filter(allowed)]),
+  ) as Record<PublishStatus, PublishStatus[]>;
+  const confirm = Object.fromEntries(
+    Object.entries(CONFIRM).map(([to, text]) => [
+      to,
+      [text, notes[to as PublishStatus]].filter(Boolean).join(' '),
+    ]),
+  ) as Partial<Record<PublishStatus, string>>;
   return (
-    <div className="space-y-3">
-      <p className="flex flex-wrap items-center gap-2">
-        <span className="font-semibold">Status:</span> <PublishStatusBadge status={status} />
-      </p>
-      <div className="flex flex-wrap gap-3">
-        {PUBLISH_TRANSITIONS[status].filter(allowed).map((to) => (
-          <Button
-            key={to}
-            variant={to === 'published' ? 'primary' : 'secondary'}
-            disabled={change.isPending}
-            onClick={() => (CONFIRM[to] ? setConfirming(to) : go(to))}
-          >
-            {actionLabel(status, to)}
-          </Button>
-        ))}
-      </div>
-      {!confirming && <FormError message={requestErrors(change.error)['']} />}
-      {confirming && (
-        <ConfirmDialog
-          title={`${actionLabel(status, confirming)} ${name}?`}
-          confirmLabel={actionLabel(status, confirming)}
-          busy={change.isPending}
-          onConfirm={() => go(confirming)}
-          onCancel={() => {
-            setConfirming(null);
-            change.reset();
-          }}
-        >
-          <p>{CONFIRM[confirming]}</p>
-          {notes[confirming] && <p>{notes[confirming]}</p>}
-          <FormError message={requestErrors(change.error)['']} />
-        </ConfirmDialog>
-      )}
-    </div>
+    <WorkflowActions
+      status={status}
+      badge={<PublishStatusBadge status={status} />}
+      transitions={transitions}
+      actionLabel={actionLabel}
+      confirm={confirm}
+      primary="published"
+      path={path}
+      name={name}
+    />
   );
 }

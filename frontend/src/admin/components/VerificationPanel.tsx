@@ -22,14 +22,17 @@ export function VerificationPanel({
   entityType,
   entityId,
   records,
+  level,
 }: {
   entityType: VerifiableEntityType;
   entityId: string;
   records: AdminVerificationRecord[];
+  level?: 2 | 3 | 4;
 }) {
   const [adding, setAdding] = useState(false);
   return (
     <Panel
+      level={level}
       title="Verification"
       actions={
         <Button variant="secondary" onClick={() => setAdding(true)}>

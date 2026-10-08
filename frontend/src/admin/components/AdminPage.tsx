@@ -1,5 +1,5 @@
 import { ChevronLeft } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { type ReactNode, useId } from 'react';
 import { Link } from 'react-router';
 import { BRAND } from '../../config/brand';
 
@@ -36,22 +36,26 @@ export function AdminPage({
 export function Panel({
   title,
   actions,
+  level = 2,
   children,
 }: {
   title: string;
   actions?: ReactNode;
+  /** Heading level: 2 for a page section, deeper when nested inside one. */
+  level?: 2 | 3 | 4;
   children: ReactNode;
 }) {
-  const id = `panel-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`;
+  const Heading = `h${level}` as const;
+  const id = useId();
   return (
     <section
       aria-labelledby={id}
       className="space-y-4 rounded-lg border border-blue-100 bg-white p-4 md:p-6"
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id={id} className="text-xl font-bold">
+        <Heading id={id} className={level === 2 ? 'text-xl font-bold' : 'text-lg font-semibold'}>
           {title}
-        </h2>
+        </Heading>
         {actions}
       </div>
       {children}

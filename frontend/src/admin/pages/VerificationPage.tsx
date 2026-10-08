@@ -30,13 +30,13 @@ const statusLabel = (status: StaleRecord['status']) =>
     ? PUBLISH_STATUS_LABELS[status as keyof typeof PUBLISH_STATUS_LABELS]
     : status.charAt(0).toUpperCase() + status.slice(1);
 
-/** Links to the admin page where the record is edited, once that page exists. */
+/** Links to the admin page where the record is edited. */
 function entityLink(type: VerifiableEntityType, ownerId: string, label: string) {
   if (type === 'university') return <Link to={`/admin/universities/${ownerId}`}>{label}</Link>;
   if (type === 'programme_admission_cycle') {
     return <Link to={`/admin/programmes/${ownerId}`}>{label}</Link>;
   }
-  return label;
+  return <Link to={`/admin/scholarships/${ownerId}`}>{label}</Link>;
 }
 
 export function VerificationPage() {

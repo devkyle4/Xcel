@@ -1,4 +1,3 @@
-import { PUBLISH_STATUSES } from '@xcel/shared';
 import { Search } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { Button } from '../../components/ui/Button';
@@ -12,12 +11,15 @@ export function ListControls({
   onSearch,
   status,
   onStatus,
+  statuses = PUBLISH_STATUS_LABELS,
 }: {
   label: string;
   q: string;
   onSearch: (q: string) => void;
   status?: string;
   onStatus?: (status: string) => void;
+  /** Status values and labels; the publishing workflow by default. */
+  statuses?: Readonly<Record<string, string>>;
 }) {
   const [draft, setDraft] = useState(q);
   const [lastQ, setLastQ] = useState(q);
@@ -61,9 +63,9 @@ export function ListControls({
             className={inputClasses}
           >
             <option value="">All statuses</option>
-            {PUBLISH_STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {PUBLISH_STATUS_LABELS[s]}
+            {Object.entries(statuses).map(([value, label]) => (
+              <option key={value} value={value}>
+                {label}
               </option>
             ))}
           </select>

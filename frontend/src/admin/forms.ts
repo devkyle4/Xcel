@@ -44,3 +44,13 @@ export function changedFields<T extends Record<string, unknown>>(
 
 /** Navigation state after a successful save; the unsaved-changes guard lets it through. */
 export const SAVED = { saved: true } as const;
+
+/** "Engineering, Health" for a list field edited as text. */
+export const listText = (values: readonly string[] | null | undefined) => (values ?? []).join(', ');
+
+/** Splits comma-separated text into trimmed, non-empty values. */
+export const parseList = (text: string) =>
+  text
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);

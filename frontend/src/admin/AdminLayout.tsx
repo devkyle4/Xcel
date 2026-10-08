@@ -1,6 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query';
 import {
+  Award,
   BadgeCheck,
+  Flag,
+  History,
+  ListOrdered,
+  Settings,
+  Users,
   BookOpen,
   Building2,
   FileText,
@@ -26,8 +32,14 @@ const NAV = [
   { to: '/admin', label: 'Dashboard', icon: LayoutDashboard, end: true },
   { to: '/admin/universities', label: 'Universities', icon: Building2 },
   { to: '/admin/programmes', label: 'Programmes', icon: BookOpen },
+  { to: '/admin/scholarships', label: 'Scholarships', icon: Award },
+  { to: '/admin/mentors', label: 'Mentors', icon: Users },
+  { to: '/admin/subjects-grades', label: 'Subjects and grades', icon: ListOrdered },
   { to: '/admin/sources', label: 'Sources', icon: FileText },
   { to: '/admin/verification', label: 'Verification', icon: BadgeCheck },
+  { to: '/admin/reports', label: 'Error reports', icon: Flag },
+  { to: '/admin/audit-log', label: 'Audit log', icon: History },
+  { to: '/admin/settings', label: 'Settings', icon: Settings },
 ];
 
 /**
