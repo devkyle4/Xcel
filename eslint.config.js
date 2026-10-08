@@ -6,7 +6,7 @@ import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['**/dist', '**/node_modules', '.vercel', 'backend/drizzle', 'coverage'] },
+  { ignores: ['**/dist', '**/node_modules', '.vercel', 'backend/drizzle', 'coverage', 'docs'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {

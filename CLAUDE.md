@@ -297,7 +297,8 @@ milestone until I say so.
 10. Browse and search: programmes, universities, scholarships
 11. Mentors: directory, profiles, session request form and email sending
 12. Admin interface: login, dashboard, management screens, rule builder UI
-13. Accessibility pass, final checks and deployment
+13a. Accessibility pass and final checks (security headers, privacy, mobile)
+13b. Deployment: Vercel and Neon configuration and a deployment guide
 
 At the end of every milestone:
 

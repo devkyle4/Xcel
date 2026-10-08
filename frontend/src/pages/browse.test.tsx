@@ -103,6 +103,12 @@ describe('UniversitiesPage and university detail', () => {
       await screen.findByRole('link', { name: 'BSc Computer Engineering' })
     ).closest('article')!;
     expect(await within(engineering).findByText('Not eligible')).toBeInTheDocument();
+    // Students are told where the statuses come from and how to change them.
+    expect(screen.getByText(/based on the results you entered this session/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Change or clear your results' })).toHaveAttribute(
+      'href',
+      '/check-eligibility',
+    );
     // Results never leave the browser.
     for (const [url] of fetchMock.mock.calls) {
       expect(String(url)).not.toMatch(/ENGLISH|results/);

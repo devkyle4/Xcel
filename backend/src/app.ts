@@ -2,6 +2,7 @@ import type { ApiError } from '@xcel/shared';
 import { Hono } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 import { secureHeaders } from 'hono/secure-headers';
+import { DrizzleQueryError } from 'drizzle-orm';
 import { type Database, getDatabase, pingDatabase as defaultPing } from './db/client';
 import { ConflictError, NotFoundError, pgErrorCode, ValidationError } from './lib/http';
 import { adminRoutes } from './modules/admin';
@@ -69,10 +70,21 @@ export function createApp(overrides: Partial<AppDeps> = {}) {
     if (pgErrorCode(err) === '23000') {
       return c.json<ApiError>({ error: 'This change is not allowed for this record' }, 409);
     }
-    // Log only the error, never request bodies or query strings.
-    console.error(err);
+    // Log only the error, never request bodies, query strings or query parameters.
+    console.error(loggableError(err));
     return c.json<ApiError>({ error: 'Internal server error' }, 500);
   });
 
   return app;
+}
+
+/**
+ * Drizzle's query errors carry the SQL parameters, which can hold record
+ * values; log the underlying database error instead.
+ */
+export function loggableError(err: unknown): unknown {
+  if (err instanceof DrizzleQueryError) {
+    return err.cause ?? new Error('Database query failed');
+  }
+  return err;
 }

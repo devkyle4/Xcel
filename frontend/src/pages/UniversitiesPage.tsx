@@ -69,25 +69,29 @@ export function UniversitiesPage() {
               No universities match your search. Try different words, or clear the filters.
             </EmptyState>
           ) : (
-            <ul className="space-y-5">
-              {list.data.items.map((u) => (
-                <li key={u.slug}>
-                  <article>
-                    <h3 className="text-lg font-semibold">
-                      <Link to={`/universities/${u.slug}`}>{u.name}</Link>
-                    </h3>
-                    <p className="text-sm">
-                      {[
-                        INSTITUTION_LABELS[u.institutionType],
-                        [u.town, u.region && REGION_LABELS[u.region]].filter(Boolean).join(', '),
-                      ]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </p>
-                  </article>
-                </li>
-              ))}
-            </ul>
+            <>
+              {/* Cards use h3 titles; this keeps the heading outline in order. */}
+              <h2 className="sr-only">Universities found</h2>
+              <ul className="space-y-5">
+                {list.data.items.map((u) => (
+                  <li key={u.slug}>
+                    <article>
+                      <h3 className="text-lg font-semibold">
+                        <Link to={`/universities/${u.slug}`}>{u.name}</Link>
+                      </h3>
+                      <p className="text-sm">
+                        {[
+                          INSTITUTION_LABELS[u.institutionType],
+                          [u.town, u.region && REGION_LABELS[u.region]].filter(Boolean).join(', '),
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </p>
+                    </article>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
           <Pagination page={page} pageSize={PAGE_SIZE} total={list.data.total} onPage={setPage} />
         </>

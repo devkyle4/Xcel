@@ -96,13 +96,17 @@ export function ScholarshipsPage() {
               No scholarships match your search. Try different words, or clear the filters.
             </EmptyState>
           ) : (
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {list.data.items.map((s) => (
-                <li key={s.slug}>
-                  <ScholarshipCard scholarship={s} />
-                </li>
-              ))}
-            </ul>
+            <>
+              {/* Cards use h3 titles; this keeps the heading outline in order. */}
+              <h2 className="sr-only">Scholarships found</h2>
+              <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {list.data.items.map((s) => (
+                  <li key={s.slug}>
+                    <ScholarshipCard scholarship={s} />
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
           <Pagination page={page} pageSize={PAGE_SIZE} total={list.data.total} onPage={setPage} />
         </>

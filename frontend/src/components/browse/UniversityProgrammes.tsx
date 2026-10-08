@@ -1,5 +1,6 @@
 import type { ProgrammeSummary } from '@xcel/shared';
 import { useId, useMemo, useState } from 'react';
+import { Link } from 'react-router';
 import { useEligibilityBundle } from '../../hooks/queries';
 import { evaluateBundle } from '../../lib/eligibility';
 import { useStoredResults } from '../../lib/results-store';
@@ -53,7 +54,17 @@ export function UniversityProgrammes({ programmes }: { programmes: ProgrammeSumm
         <p>No programmes have been published for this institution yet.</p>
       ) : (
         <>
-          {!results && (
+          {results ? (
+            <p className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg bg-blue-50 p-3">
+              <span>
+                Each programme shows whether you appear eligible, based on the results you entered
+                this session. Final admission decisions are made by the institution.
+              </span>
+              <Link to={CHECK_ELIGIBILITY_PATH} className="font-semibold">
+                Change or clear your results
+              </Link>
+            </p>
+          ) : (
             <p className="flex flex-wrap items-center gap-3">
               <span>Enter your WASSCE results to see which of these you appear eligible for.</span>
               <ButtonLink to={CHECK_ELIGIBILITY_PATH} variant="secondary">

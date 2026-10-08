@@ -1,5 +1,6 @@
+import { DrizzleQueryError } from 'drizzle-orm';
 import { describe, expect, it } from 'vitest';
-import { createApp } from './app';
+import { createApp, loggableError } from './app';
 
 describe('GET /api/health', () => {
   it('reports ok when the database is reachable', async () => {
@@ -23,5 +24,20 @@ describe('unknown routes', () => {
     const res = await app.request('/api/nope');
     expect(res.status).toBe(404);
     expect(await res.json()).toEqual({ error: 'Not found' });
+  });
+});
+
+describe('error logging', () => {
+  it('never logs SQL parameters from failed queries', () => {
+    const cause = new Error('duplicate key value violates unique constraint');
+    const failed = new DrizzleQueryError(
+      'insert into mentors values ($1)',
+      ['private@example.com'],
+      cause,
+    );
+    expect(failed.message).toContain('private@example.com');
+    const logged = loggableError(failed);
+    expect(logged).toBe(cause);
+    expect(String(logged)).not.toContain('private@example.com');
   });
 });

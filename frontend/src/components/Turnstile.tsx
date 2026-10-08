@@ -72,5 +72,11 @@ export function Turnstile({
       window.turnstile.reset(widgetId.current);
   }, [resetKey]);
 
-  return <div ref={container} />;
+  // The widget draws inside its own frame; this ring shows keyboard focus on it too.
+  return (
+    <div
+      ref={container}
+      className="inline-block rounded-md focus-within:outline-3 focus-within:outline-offset-2 focus-within:outline-blue-700"
+    />
+  );
 }

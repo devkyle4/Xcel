@@ -58,13 +58,17 @@ export function MentorsPage() {
                 : 'No mentors are available yet. Please check back soon.'}
             </EmptyState>
           ) : (
-            <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {list.data.items.map((m) => (
-                <li key={m.slug}>
-                  <MentorCard mentor={m} />
-                </li>
-              ))}
-            </ul>
+            <>
+              {/* Cards use h3 titles; this keeps the heading outline in order. */}
+              <h2 className="sr-only">Mentors</h2>
+              <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {list.data.items.map((m) => (
+                  <li key={m.slug}>
+                    <MentorCard mentor={m} />
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
           <Pagination page={page} pageSize={PAGE_SIZE} total={list.data.total} onPage={setPage} />
         </>
