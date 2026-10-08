@@ -2,6 +2,11 @@
 @import './tokens.css';
 
 @layer base {
+  /* Keeps the target of an in-page jump or a focused field clear of the sticky navbar. */
+  html {
+    scroll-padding-top: 5rem;
+  }
+
   body {
     @apply bg-white font-sans leading-normal text-blue-950;
   }

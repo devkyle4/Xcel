@@ -5,12 +5,14 @@ import { BRAND } from '../config/brand';
 /** About, disclaimer and contact live here, not in the main navigation (SRS 11.4). */
 export function Footer() {
   return (
-    <footer className="mt-16 bg-blue-950 text-white [&_:focus-visible]:outline-white">
+    <footer className="mt-16 border-t border-white/15 bg-linear-to-b from-blue-950/80 to-blue-950/90 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18)] backdrop-blur-2xl backdrop-saturate-150 [&_:focus-visible]:outline-white">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-[2fr_1fr]">
         <div className="space-y-3">
           <p className="text-lg font-bold">{BRAND.name}</p>
           <p className="max-w-prose">{BRAND.tagline}</p>
-          <p className="max-w-prose text-sm">{ELIGIBILITY_DISCLAIMER}</p>
+          <p className="max-w-prose rounded-lg bg-white/10 p-3 text-sm">
+            <strong>Please note:</strong> {ELIGIBILITY_DISCLAIMER}
+          </p>
         </div>
         <nav aria-label="Footer">
           <ul className="space-y-2">
@@ -20,7 +22,10 @@ export function Footer() {
               { to: '/contact', label: 'Contact' },
             ].map(({ to, label }) => (
               <li key={to}>
-                <Link to={to} className="text-white underline-offset-4 hover:underline">
+                <Link
+                  to={to}
+                  className="font-semibold text-white no-underline underline-offset-4 hover:underline"
+                >
                   {label}
                 </Link>
               </li>
@@ -28,7 +33,7 @@ export function Footer() {
           </ul>
         </nav>
       </div>
-      <div className="border-t border-blue-900">
+      <div className="border-t border-white/10">
         <p className="mx-auto max-w-6xl px-4 py-4 text-sm">
           © {new Date().getFullYear()} {BRAND.name}
         </p>

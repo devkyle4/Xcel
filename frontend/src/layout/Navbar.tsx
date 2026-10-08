@@ -6,7 +6,7 @@ import { Logo } from '../components/Logo';
 import { CHECK_ELIGIBILITY_PATH, NAV_LINKS } from '../config/navigation';
 
 const linkClasses = ({ isActive }: { isActive: boolean }) =>
-  `block rounded-md px-3 py-2 font-medium text-white no-underline hover:bg-blue-900 ${
+  `block rounded-md px-3 py-2 font-medium text-white no-underline hover:bg-white/10 ${
     isActive ? 'underline decoration-2 underline-offset-8' : ''
   }`;
 
@@ -37,8 +37,10 @@ export function Navbar() {
     ));
 
   return (
-    // White focus rings: blue-700 is not visible enough on blue-950.
-    <header className="bg-blue-950 text-white [&_:focus-visible]:outline-white">
+    // Frosted, glossy blue glass pinned to the top: content blurs through it, with a light
+    // sheen along the top edge. Never below 65% opacity, so white text keeps at least 5:1
+    // contrast even over a white page. White focus rings: blue-700 is not visible on blue-950.
+    <header className="sticky top-0 z-40 border-b border-white/15 bg-linear-to-b from-blue-950/80 to-blue-950/65 text-white shadow-[inset_0_1px_0_rgba(255,255,255,0.18),0_8px_24px_rgba(11,31,77,0.18)] backdrop-blur-2xl backdrop-saturate-150 [&_:focus-visible]:outline-white">
       <nav aria-label="Main" className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-3">
         <Logo />
         <ul className="ml-auto hidden items-center gap-1 md:flex">{links()}</ul>
@@ -52,7 +54,7 @@ export function Navbar() {
         <button
           ref={toggleRef}
           type="button"
-          className="rounded-md p-2 text-white hover:bg-blue-900 md:hidden"
+          className="rounded-md p-2 text-white hover:bg-white/10 md:hidden"
           aria-expanded={open}
           aria-controls="mobile-menu"
           onClick={() => setOpen((v) => !v)}
@@ -66,7 +68,7 @@ export function Navbar() {
         </button>
       </nav>
       {open && (
-        <div id="mobile-menu" className="border-t border-blue-900 md:hidden">
+        <div id="mobile-menu" className="border-t border-white/10 md:hidden">
           <ul className="mx-auto max-w-6xl space-y-1 px-4 py-3">{links(() => setOpen(false))}</ul>
         </div>
       )}

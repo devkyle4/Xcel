@@ -219,7 +219,8 @@ Palette is blue, green and white, with red reserved for negative outcomes.
 
 | Role | Token |
 |---|---|
-| Navbar, footer, headings, body text | `--blue-950` |
+| Navbar and footer | Frosted `--blue-950` glass: 65–90% opacity with backdrop blur, white text (navbar sticky) |
+| Headings, body text | `--blue-950` |
 | Links, secondary buttons, focus rings | `--blue-700` |
 | Primary CTA (Check Eligibility, Send request) | `--green-700`, hover `--green-800`, white text |
 | Info panels / section backgrounds | `--blue-50` or `--green-50` |
