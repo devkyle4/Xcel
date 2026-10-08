@@ -20,13 +20,13 @@ const MENTORS: {
     slug: 'evans-kwasi',
     fullName: 'Evans Kwasi',
     contactEmail: 'evans.kwasi@example.com',
-    topics: ['choosing_programme', 'application_guidance', 'general_guidance'],
+    topics: ['choosing_programme', 'scholarship_guidance', 'general_guidance'],
   },
   {
     slug: 'aaron-alan-cobbinah',
     fullName: 'Aaron Alan Cobbinah',
     contactEmail: 'aaron.cobbinah@example.com',
-    topics: ['wassce_requirements', 'scholarship_guidance', 'general_guidance'],
+    topics: ['wassce_requirements', 'application_guidance', 'general_guidance'],
   },
 ];
 

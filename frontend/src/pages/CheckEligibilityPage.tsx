@@ -222,7 +222,7 @@ function ResultsForm({ subjects, grades }: { subjects: SubjectInfo[]; grades: Gr
             const update = (patch: Partial<ElectiveRow>) =>
               setElectives((rows) => rows.map((r) => (r.key === row.key ? { ...r, ...patch } : r)));
             return (
-              <li key={row.key} className="grid gap-3 sm:grid-cols-[1fr_12rem_auto] sm:items-end">
+              <li key={row.key} className="grid gap-3 sm:grid-cols-[1fr_10rem_auto] sm:items-end">
                 <div>
                   <label
                     htmlFor={`${formId}-subject-${row.key}`}
@@ -306,6 +306,7 @@ export function CheckEligibilityPage() {
   const { catalogue, isPending, error } = useCatalogue();
   return (
     <PageContainer
+      narrow
       title="Check your eligibility"
       intro="Enter your WASSCE subjects and grades. You will then see which programmes’ published requirements you appear to meet, and why."
     >
