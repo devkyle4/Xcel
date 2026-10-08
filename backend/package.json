@@ -12,6 +12,7 @@
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx --env-file-if-exists=.env src/db/seed/run.ts",
     "db:seed:mentors": "tsx --env-file-if-exists=.env src/db/seed/run-mentors.ts",
+    "db:seed:directory": "tsx --env-file-if-exists=.env src/db/seed/run-directory.ts",
     "db:seed:demo": "tsx --env-file-if-exists=.env src/db/seed/run-demo.ts",
     "db:seed:scholarships": "tsx --env-file-if-exists=.env src/db/seed/run-scholarships.ts",
     "db:seed:universities": "tsx --env-file-if-exists=.env src/db/seed/run-universities.ts",
