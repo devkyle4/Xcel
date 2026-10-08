@@ -15,6 +15,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./src/test-setup.ts'],
+    // Page tests drive whole user journeys through the router and forms.
+    testTimeout: 15_000,
     // CSS is skipped in tests except the tokens, which the contrast test reads.
     css: { include: [/tokens\.css/] },
   },

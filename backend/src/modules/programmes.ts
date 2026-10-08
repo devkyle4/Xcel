@@ -1,5 +1,6 @@
 import {
   type AdmissionCycleInfo,
+  type ProgrammeFilterOptions,
   type Paginated,
   type ProgrammeDetail,
   programmeDetailQuerySchema,
@@ -79,105 +80,129 @@ export async function programmeSummaries(
 }
 
 export function programmeRoutes(db: () => Db) {
-  return new Hono()
-    .get('/', async (c) => {
-      const query = parseQuery(c, programmeQuerySchema);
-      const conditions: SQL[] = [programmeIsPublic];
-      let rank: SQL<number> | undefined;
-      if (query.q) {
-        const search = textSearch(
-          { vector: programmes.searchVector, name: programmes.name },
-          query.q,
-        );
-        conditions.push(search.where);
-        rank = search.rank;
-      }
-      if (query.university) conditions.push(eq(universities.slug, query.university));
-      if (query.field) conditions.push(sql`lower(${programmes.field}) = lower(${query.field})`);
-      if (query.degreeType) conditions.push(eq(programmes.degreeType, query.degreeType));
-      if (query.region) conditions.push(eq(universities.region, query.region));
-      const where = and(...conditions)!;
-
-      const [items, total] = await Promise.all([
-        programmeSummaries(db(), where, {
-          orderBy: [...(rank ? [desc(rank)] : []), asc(universities.name), asc(programmes.name)],
-          ...paginate(query),
-        }),
-        countOf(
+  return (
+    new Hono()
+      // Registered before "/:id" so "filters" is not read as an id.
+      .get('/filters', async (c) => {
+        const [fields, unis] = await Promise.all([
           db()
-            .select({ total: count() })
+            .selectDistinct({ field: programmes.field })
             .from(programmes)
             .innerJoin(universities, eq(universities.id, programmes.universityId))
-            .where(where),
-        ),
-      ]);
-
-      cachePublicly(c, 60);
-      return c.json<Paginated<ProgrammeSummary>>({
-        items,
-        page: query.page,
-        pageSize: query.pageSize,
-        total,
-      });
-    })
-    .get('/:id', async (c) => {
-      const id = uuidParam(c, 'id');
-      const { year } = parseQuery(c, programmeDetailQuerySchema);
-
-      const [summary] = await programmeSummaries(
-        db(),
-        and(programmeIsPublic, eq(programmes.id, id))!,
-      );
-      if (!summary) throw new NotFoundError('Programme not found');
-
-      const [details] = await db()
-        .select({ description: programmes.description, facultySchool: facultySchools.name })
-        .from(programmes)
-        .leftJoin(facultySchools, eq(facultySchools.id, programmes.facultySchoolId))
-        .where(eq(programmes.id, id));
-
-      const cycles = await db()
-        .select()
-        .from(programmeAdmissionCycles)
-        .where(
-          and(
-            eq(programmeAdmissionCycles.programmeId, id),
-            eq(programmeAdmissionCycles.status, 'published'),
-          ),
-        )
-        .orderBy(desc(programmeAdmissionCycles.academicYear));
-
-      const selected = year ? cycles.find((cy) => cy.academicYear === year) : cycles[0];
-      if (year && !selected) {
-        throw new NotFoundError(`No published requirements for ${year}`);
-      }
-
-      let cycle: AdmissionCycleInfo | null = null;
-      if (selected) {
-        const [trees, verifications] = await Promise.all([
-          loadRequirementTrees(db(), [selected.id]),
-          latestVerifications(db(), 'programme_admission_cycle', [selected.id]),
+            .where(and(programmeIsPublic, sql`${programmes.field} IS NOT NULL`))
+            .orderBy(asc(programmes.field)),
+          db()
+            .selectDistinct({ slug: universities.slug, name: universities.name })
+            .from(programmes)
+            .innerJoin(universities, eq(universities.id, programmes.universityId))
+            .where(programmeIsPublic)
+            .orderBy(asc(universities.name)),
         ]);
-        cycle = {
-          id: selected.id,
-          academicYear: selected.academicYear,
-          version: selected.version,
-          applicationOpensOn: selected.applicationOpensOn,
-          applicationDeadline: selected.applicationDeadline,
-          applicationUrl: selected.applicationUrl,
-          notes: selected.notes,
-          requirements: trees.get(selected.id) ?? null,
-          verification: verifications.get(selected.id) ?? null,
-        };
-      }
+        cachePublicly(c, 300);
+        return c.json<ProgrammeFilterOptions>({
+          fields: fields.map((f) => f.field!),
+          universities: unis,
+        });
+      })
+      .get('/', async (c) => {
+        const query = parseQuery(c, programmeQuerySchema);
+        const conditions: SQL[] = [programmeIsPublic];
+        let rank: SQL<number> | undefined;
+        if (query.q) {
+          const search = textSearch(
+            { vector: programmes.searchVector, name: programmes.name },
+            query.q,
+          );
+          conditions.push(search.where);
+          rank = search.rank;
+        }
+        if (query.university) conditions.push(eq(universities.slug, query.university));
+        if (query.field) conditions.push(sql`lower(${programmes.field}) = lower(${query.field})`);
+        if (query.degreeType) conditions.push(eq(programmes.degreeType, query.degreeType));
+        if (query.region) conditions.push(eq(universities.region, query.region));
+        const where = and(...conditions)!;
 
-      cachePublicly(c, 60);
-      return c.json<ProgrammeDetail>({
-        ...summary,
-        description: details?.description ?? null,
-        facultySchool: details?.facultySchool ?? null,
-        availableYears: cycles.map((cy) => cy.academicYear),
-        cycle,
-      });
-    });
+        const [items, total] = await Promise.all([
+          programmeSummaries(db(), where, {
+            orderBy: [...(rank ? [desc(rank)] : []), asc(universities.name), asc(programmes.name)],
+            ...paginate(query),
+          }),
+          countOf(
+            db()
+              .select({ total: count() })
+              .from(programmes)
+              .innerJoin(universities, eq(universities.id, programmes.universityId))
+              .where(where),
+          ),
+        ]);
+
+        cachePublicly(c, 60);
+        return c.json<Paginated<ProgrammeSummary>>({
+          items,
+          page: query.page,
+          pageSize: query.pageSize,
+          total,
+        });
+      })
+      .get('/:id', async (c) => {
+        const id = uuidParam(c, 'id');
+        const { year } = parseQuery(c, programmeDetailQuerySchema);
+
+        const [summary] = await programmeSummaries(
+          db(),
+          and(programmeIsPublic, eq(programmes.id, id))!,
+        );
+        if (!summary) throw new NotFoundError('Programme not found');
+
+        const [details] = await db()
+          .select({ description: programmes.description, facultySchool: facultySchools.name })
+          .from(programmes)
+          .leftJoin(facultySchools, eq(facultySchools.id, programmes.facultySchoolId))
+          .where(eq(programmes.id, id));
+
+        const cycles = await db()
+          .select()
+          .from(programmeAdmissionCycles)
+          .where(
+            and(
+              eq(programmeAdmissionCycles.programmeId, id),
+              eq(programmeAdmissionCycles.status, 'published'),
+            ),
+          )
+          .orderBy(desc(programmeAdmissionCycles.academicYear));
+
+        const selected = year ? cycles.find((cy) => cy.academicYear === year) : cycles[0];
+        if (year && !selected) {
+          throw new NotFoundError(`No published requirements for ${year}`);
+        }
+
+        let cycle: AdmissionCycleInfo | null = null;
+        if (selected) {
+          const [trees, verifications] = await Promise.all([
+            loadRequirementTrees(db(), [selected.id]),
+            latestVerifications(db(), 'programme_admission_cycle', [selected.id]),
+          ]);
+          cycle = {
+            id: selected.id,
+            academicYear: selected.academicYear,
+            version: selected.version,
+            applicationOpensOn: selected.applicationOpensOn,
+            applicationDeadline: selected.applicationDeadline,
+            applicationUrl: selected.applicationUrl,
+            notes: selected.notes,
+            requirements: trees.get(selected.id) ?? null,
+            verification: verifications.get(selected.id) ?? null,
+          };
+        }
+
+        cachePublicly(c, 60);
+        return c.json<ProgrammeDetail>({
+          ...summary,
+          description: details?.description ?? null,
+          facultySchool: details?.facultySchool ?? null,
+          availableYears: cycles.map((cy) => cy.academicYear),
+          cycle,
+        });
+      })
+  );
 }

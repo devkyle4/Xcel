@@ -252,8 +252,7 @@ function ResultsForm({ subjects, grades }: { subjects: SubjectInfo[]; grades: Gr
                     htmlFor={`${formId}-grade-${row.key}`}
                     className="mb-1 block font-semibold"
                   >
-                    Grade
-                    <span className="sr-only"> for elective subject {i + 1}</span>
+                    Grade <span className="sr-only">for elective subject {i + 1}</span>
                   </label>
                   <GradeSelect
                     id={`${formId}-grade-${row.key}`}
@@ -269,7 +268,7 @@ function ResultsForm({ subjects, grades }: { subjects: SubjectInfo[]; grades: Gr
                   onClick={() => setElectives((rows) => rows.filter((r) => r.key !== row.key))}
                 >
                   <Trash2 aria-hidden="true" className="size-5" />
-                  Remove<span className="sr-only"> elective subject {i + 1}</span>
+                  Remove <span className="sr-only">elective subject {i + 1}</span>
                 </button>
               </li>
             );

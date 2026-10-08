@@ -50,18 +50,31 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'programmes',
-        lazy: comingSoon(
-          'Programmes',
-          'Search university programmes and their admission requirements.',
-        ),
+        lazy: async () => ({ Component: (await import('./pages/ProgrammesPage')).ProgrammesPage }),
       },
       {
         path: 'universities',
-        lazy: comingSoon('Universities', 'Browse universities and the programmes they offer.'),
+        lazy: async () => ({
+          Component: (await import('./pages/UniversitiesPage')).UniversitiesPage,
+        }),
+      },
+      {
+        path: 'universities/:slug',
+        lazy: async () => ({
+          Component: (await import('./pages/UniversityDetailPage')).UniversityDetailPage,
+        }),
       },
       {
         path: 'scholarships',
-        lazy: comingSoon('Scholarships', 'Find scholarships that are open now or opening soon.'),
+        lazy: async () => ({
+          Component: (await import('./pages/ScholarshipsPage')).ScholarshipsPage,
+        }),
+      },
+      {
+        path: 'scholarships/:slug',
+        lazy: async () => ({
+          Component: (await import('./pages/ScholarshipDetailPage')).ScholarshipDetailPage,
+        }),
       },
       {
         path: 'mentors',

@@ -1,5 +1,6 @@
 import {
   ghanaToday,
+  type ScholarshipFilterOptions,
   type Paginated,
   type ScholarshipDetail,
   scholarshipAvailability,
@@ -99,117 +100,143 @@ export async function scholarshipSummaries(
 }
 
 export function scholarshipRoutes(db: () => Db) {
-  return new Hono()
-    .get('/', async (c) => {
-      const query = parseQuery(c, scholarshipQuerySchema);
-      let rank: SQL<number> | undefined;
+  return (
+    new Hono()
+      // Registered before "/:slug" so "filters" is not read as a slug.
+      .get('/filters', async (c) => {
+        const isPublic = inArray(scholarships.status, PUBLIC_STATUSES);
+        const distinctValues = async (column: SQL) =>
+          (
+            await db()
+              .selectDistinct({ value: sql<string>`${column}`.as('value') })
+              .from(scholarships)
+              .where(isPublic)
+              .orderBy(sql`value`)
+          )
+            .map((r) => r.value)
+            .filter(Boolean);
+        const [fields, eligibilityCategories, locations] = await Promise.all([
+          distinctValues(sql`unnest(${scholarships.fields})`),
+          distinctValues(sql`unnest(${scholarships.eligibilityCategories})`),
+          distinctValues(sql`${scholarships.location}`),
+        ]);
+        cachePublicly(c, 300);
+        return c.json<ScholarshipFilterOptions>({ fields, eligibilityCategories, locations });
+      })
+      .get('/', async (c) => {
+        const query = parseQuery(c, scholarshipQuerySchema);
+        let rank: SQL<number> | undefined;
 
-      const where = (current: CurrentCycles, today: string) => {
-        const conditions: SQL[] = [];
-        if (query.q) {
-          const search = textSearch(
-            {
-              vector: scholarships.searchVector,
-              name: scholarships.name,
-              also: [scholarships.providerName],
-            },
-            query.q,
-          );
-          conditions.push(search.where);
-          rank = search.rank;
-        }
-        if (query.studyLevel) {
-          conditions.push(sql`${query.studyLevel}::study_level = ANY(${scholarships.studyLevels})`);
-        }
-        if (query.field) conditions.push(arrayContainsIgnoreCase(scholarships.fields, query.field));
-        if (query.category) {
-          conditions.push(
-            arrayContainsIgnoreCase(scholarships.eligibilityCategories, query.category),
-          );
-        }
-        if (query.location) {
-          conditions.push(ilike(scholarships.location, `%${escapeLike(query.location)}%`));
-        }
-        if (query.availability) {
-          conditions.push(inArray(availabilitySql(current, today), query.availability) as SQL);
-        }
-        return and(sql`true`, ...conditions)!;
-      };
+        const where = (current: CurrentCycles, today: string) => {
+          const conditions: SQL[] = [];
+          if (query.q) {
+            const search = textSearch(
+              {
+                vector: scholarships.searchVector,
+                name: scholarships.name,
+                also: [scholarships.providerName],
+              },
+              query.q,
+            );
+            conditions.push(search.where);
+            rank = search.rank;
+          }
+          if (query.studyLevel) {
+            conditions.push(
+              sql`${query.studyLevel}::study_level = ANY(${scholarships.studyLevels})`,
+            );
+          }
+          if (query.field)
+            conditions.push(arrayContainsIgnoreCase(scholarships.fields, query.field));
+          if (query.category) {
+            conditions.push(
+              arrayContainsIgnoreCase(scholarships.eligibilityCategories, query.category),
+            );
+          }
+          if (query.location) {
+            conditions.push(ilike(scholarships.location, `%${escapeLike(query.location)}%`));
+          }
+          if (query.availability) {
+            conditions.push(inArray(availabilitySql(current, today), query.availability) as SQL);
+          }
+          return and(sql`true`, ...conditions)!;
+        };
 
-      const items = await scholarshipSummaries(db(), where, {
-        ...paginate(query),
-        ...(query.q && {
-          orderBy: () => [desc(rank!), asc(scholarships.name)],
-        }),
-      });
+        const items = await scholarshipSummaries(db(), where, {
+          ...paginate(query),
+          ...(query.q && {
+            orderBy: () => [desc(rank!), asc(scholarships.name)],
+          }),
+        });
 
-      const current = currentScholarshipCycles(db());
-      const today = ghanaToday();
-      const total = await countOf(
-        db()
-          .select({ total: count() })
+        const current = currentScholarshipCycles(db());
+        const today = ghanaToday();
+        const total = await countOf(
+          db()
+            .select({ total: count() })
+            .from(scholarships)
+            .leftJoin(current, eq(current.scholarshipId, scholarships.id))
+            .where(and(inArray(scholarships.status, PUBLIC_STATUSES), where(current, today))),
+        );
+
+        cachePublicly(c, 60);
+        return c.json<Paginated<ScholarshipSummary>>({
+          items,
+          page: query.page,
+          pageSize: query.pageSize,
+          total,
+        });
+      })
+      .get('/:slug', async (c) => {
+        const slug = c.req.param('slug');
+        const [summary] = await scholarshipSummaries(db(), () => eq(scholarships.slug, slug));
+        if (!summary) throw new NotFoundError('Scholarship not found');
+
+        const [row] = await db()
+          .select({
+            id: scholarships.id,
+            description: scholarships.description,
+            providerUrl: scholarships.providerUrl,
+            universitySlug: universities.slug,
+            universityName: universities.name,
+            universityStatus: universities.status,
+          })
           .from(scholarships)
-          .leftJoin(current, eq(current.scholarshipId, scholarships.id))
-          .where(and(inArray(scholarships.status, PUBLIC_STATUSES), where(current, today))),
-      );
+          .leftJoin(universities, eq(universities.id, scholarships.universityId))
+          .where(eq(scholarships.slug, slug));
 
-      cachePublicly(c, 60);
-      return c.json<Paginated<ScholarshipSummary>>({
-        items,
-        page: query.page,
-        pageSize: query.pageSize,
-        total,
-      });
-    })
-    .get('/:slug', async (c) => {
-      const slug = c.req.param('slug');
-      const [summary] = await scholarshipSummaries(db(), () => eq(scholarships.slug, slug));
-      if (!summary) throw new NotFoundError('Scholarship not found');
+        const [cycle] = await db()
+          .select({ id: scholarshipCycles.id, applicationUrl: scholarshipCycles.applicationUrl })
+          .from(scholarshipCycles)
+          .where(eq(scholarshipCycles.scholarshipId, row!.id))
+          .orderBy(desc(scholarshipCycles.academicYear))
+          .limit(1);
 
-      const [row] = await db()
-        .select({
-          id: scholarships.id,
-          description: scholarships.description,
-          providerUrl: scholarships.providerUrl,
-          universitySlug: universities.slug,
-          universityName: universities.name,
-          universityStatus: universities.status,
-        })
-        .from(scholarships)
-        .leftJoin(universities, eq(universities.id, scholarships.universityId))
-        .where(eq(scholarships.slug, slug));
+        const [requirements, verifications] = cycle
+          ? await Promise.all([
+              db()
+                .select({ description: scholarshipRequirements.description })
+                .from(scholarshipRequirements)
+                .where(eq(scholarshipRequirements.cycleId, cycle.id))
+                .orderBy(asc(scholarshipRequirements.sortOrder)),
+              latestVerifications(db(), 'scholarship_cycle', [cycle.id]),
+            ])
+          : [[], new Map()];
 
-      const [cycle] = await db()
-        .select({ id: scholarshipCycles.id, applicationUrl: scholarshipCycles.applicationUrl })
-        .from(scholarshipCycles)
-        .where(eq(scholarshipCycles.scholarshipId, row!.id))
-        .orderBy(desc(scholarshipCycles.academicYear))
-        .limit(1);
-
-      const [requirements, verifications] = cycle
-        ? await Promise.all([
-            db()
-              .select({ description: scholarshipRequirements.description })
-              .from(scholarshipRequirements)
-              .where(eq(scholarshipRequirements.cycleId, cycle.id))
-              .orderBy(asc(scholarshipRequirements.sortOrder)),
-            latestVerifications(db(), 'scholarship_cycle', [cycle.id]),
-          ])
-        : [[], new Map()];
-
-      cachePublicly(c, 60);
-      return c.json<ScholarshipDetail>({
-        ...summary,
-        description: row!.description,
-        providerUrl: row!.providerUrl,
-        applicationUrl: cycle?.applicationUrl ?? null,
-        // Only link a university that is itself public.
-        university:
-          row!.universitySlug && row!.universityStatus === 'published'
-            ? { slug: row!.universitySlug, name: row!.universityName! }
-            : null,
-        requirements: requirements.map((r) => r.description),
-        verification: (cycle && verifications.get(cycle.id)) ?? null,
-      });
-    });
+        cachePublicly(c, 60);
+        return c.json<ScholarshipDetail>({
+          ...summary,
+          description: row!.description,
+          providerUrl: row!.providerUrl,
+          applicationUrl: cycle?.applicationUrl ?? null,
+          // Only link a university that is itself public.
+          university:
+            row!.universitySlug && row!.universityStatus === 'published'
+              ? { slug: row!.universitySlug, name: row!.universityName! }
+              : null,
+          requirements: requirements.map((r) => r.description),
+          verification: (cycle && verifications.get(cycle.id)) ?? null,
+        });
+      })
+  );
 }

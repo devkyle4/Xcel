@@ -2,7 +2,9 @@ import type {
   EligibilityBundle,
   GradeInfo,
   ProgrammeDetail,
+  ProgrammeSummary,
   RequirementGroupNode,
+  ScholarshipSummary,
   SubjectInfo,
 } from '@xcel/shared';
 
@@ -157,3 +159,54 @@ export const programmeDetail: ProgrammeDetail = {
 };
 
 export const catalogueRoutes = { 'GET /api/subjects': subjects, 'GET /api/grades': grades };
+
+const summary = (p: EligibilityBundle['programmes'][number]): ProgrammeSummary => ({
+  id: p.id,
+  name: p.name,
+  field: p.field,
+  degreeType: p.degreeType,
+  durationYears: 4,
+  campus: null,
+  university: p.university,
+  academicYear: p.academicYear,
+});
+
+export const programmeSummaries: ProgrammeSummary[] = bundle.programmes.map(summary);
+
+export const scholarshipSummaries: ScholarshipSummary[] = [
+  {
+    slug: 'merit-award',
+    name: 'Merit Award',
+    providerName: 'Ghana Education Trust',
+    studyLevels: ['undergraduate'],
+    fields: ['Engineering'],
+    eligibilityCategories: ['Merit'],
+    location: 'Ghana',
+    coverage: 'Full tuition',
+    academicYear: '2026/2027',
+    opensOn: '2026-09-01',
+    closesOn: '2026-12-31',
+    availability: 'open',
+  },
+  {
+    slug: 'old-award',
+    name: 'Old Award',
+    providerName: 'Fund B',
+    studyLevels: [],
+    fields: [],
+    eligibilityCategories: [],
+    location: null,
+    coverage: null,
+    academicYear: '2025/2026',
+    opensOn: null,
+    closesOn: '2026-01-31',
+    availability: 'closed',
+  },
+];
+
+export const page = <T>(items: T[], total = items.length, pageNumber = 1) => ({
+  items,
+  total,
+  page: pageNumber,
+  pageSize: 20,
+});

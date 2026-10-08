@@ -1,4 +1,4 @@
-import { screen, within } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderRoute } from '../test/render';
 
@@ -64,7 +64,7 @@ describe('Navbar', () => {
     await user.click(
       within(document.getElementById('mobile-menu')!).getByRole('link', { name: 'Universities' }),
     );
-    expect(router.state.location.pathname).toBe('/universities');
+    await waitFor(() => expect(router.state.location.pathname).toBe('/universities'));
     expect(document.getElementById('mobile-menu')).toBeNull();
   });
 });

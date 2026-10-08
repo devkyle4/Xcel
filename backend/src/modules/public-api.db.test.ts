@@ -349,6 +349,30 @@ describe('GET /api/programmes', () => {
   });
 });
 
+describe('filter options', () => {
+  it('lists fields and universities used by public programmes only', async () => {
+    const { body } = await get<{ fields: string[]; universities: { slug: string }[] }>(
+      '/api/programmes/filters',
+    );
+    expect(body).toEqual({
+      fields: ['Engineering', 'Social Sciences'],
+      universities: [
+        { slug: 'knust', name: 'Kwame Nkrumah University of Science and Technology' },
+        { slug: 'university-of-ghana', name: 'University of Ghana' },
+      ],
+    });
+  });
+
+  it('lists scholarship fields, categories and locations, excluding drafts', async () => {
+    const { body } = await get('/api/scholarships/filters');
+    expect(body).toEqual({
+      fields: ['Engineering'],
+      eligibilityCategories: ['Need-based'],
+      locations: ['Ghana'],
+    });
+  });
+});
+
 describe('GET /api/programmes/:id', () => {
   it('shows the latest published cycle with its requirements and verification', async () => {
     const { body } = await get<ProgrammeDetail>(`/api/programmes/${ids.engineering}`);

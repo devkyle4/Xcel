@@ -1,4 +1,4 @@
-import type { DegreeType, GhanaRegion, InstitutionType } from '@xcel/shared';
+import type { DegreeType, GhanaRegion, InstitutionType, StudyLevel } from '@xcel/shared';
 
 const dateFormat = new Intl.DateTimeFormat('en-GB', { dateStyle: 'long', timeZone: 'UTC' });
 
@@ -40,4 +40,11 @@ export const INSTITUTION_LABELS: Record<InstitutionType, string> = {
   college_of_education: 'College of education',
   nursing_and_midwifery_college: 'Nursing and midwifery college',
   other: 'Other institution',
+};
+
+export const STUDY_LEVEL_LABELS: Record<StudyLevel, string> = {
+  certificate: 'Certificate',
+  diploma: 'Diploma',
+  undergraduate: 'Undergraduate',
+  postgraduate: 'Postgraduate',
 };

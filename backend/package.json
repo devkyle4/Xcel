@@ -11,6 +11,7 @@
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx --env-file-if-exists=.env src/db/seed/run.ts",
+    "db:seed:demo": "tsx --env-file-if-exists=.env src/db/seed/run-demo.ts",
     "admin:create": "tsx --env-file-if-exists=.env src/scripts/admin.ts create",
     "admin:reset-password": "tsx --env-file-if-exists=.env src/scripts/admin.ts reset-password",
     "test:db": "vitest run --config vitest.db.config.ts"

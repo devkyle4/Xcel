@@ -10,8 +10,7 @@ export function Logo({ className = '' }: { className?: string }) {
       className={`inline-flex items-center gap-2 text-xl font-bold text-white no-underline ${className}`}
     >
       <GraduationCap aria-hidden="true" className="size-7" />
-      {BRAND.name}
-      <span className="sr-only"> – home</span>
+      {BRAND.name} <span className="sr-only">– home</span>
     </Link>
   );
 }

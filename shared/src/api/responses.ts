@@ -131,6 +131,19 @@ export interface ScholarshipDetail extends ScholarshipSummary {
   verification: VerificationInfo | null;
 }
 
+/** Values that public programmes actually use, for filter options. */
+export interface ProgrammeFilterOptions {
+  fields: string[];
+  universities: { slug: string; name: string }[];
+}
+
+/** Values that public scholarships actually use, for filter options. */
+export interface ScholarshipFilterOptions {
+  fields: string[];
+  eligibilityCategories: string[];
+  locations: string[];
+}
+
 /**
  * Everything the browser needs to check eligibility locally: the grade and
  * subject catalogue and every published programme's current requirements.

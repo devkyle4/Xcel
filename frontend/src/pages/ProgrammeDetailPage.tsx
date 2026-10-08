@@ -1,11 +1,12 @@
-import { ExternalLink } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { EligibilityDisclaimer } from '../components/Disclaimer';
 import { RequirementList } from '../components/eligibility/RequirementList';
 import { LoadError, Loading } from '../components/LoadState';
 import { PageContainer } from '../components/PageContainer';
+import { ExternalLinkButton } from '../components/ExternalLinkButton';
 import { ReportForm } from '../components/ReportForm';
+import { VerificationLine } from '../components/VerificationLine';
 import { ButtonLink } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { CHECK_ELIGIBILITY_PATH } from '../config/navigation';
@@ -160,32 +161,7 @@ export function ProgrammeDetailPage() {
               )}
             </div>
 
-            {cycle.verification ? (
-              <p className="text-sm">
-                Verified on {formatDate(cycle.verification.verifiedAt)}
-                {cycle.verification.source && (
-                  <>
-                    {' · Source: '}
-                    {cycle.verification.source.url ? (
-                      <a
-                        href={cycle.verification.source.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {cycle.verification.source.title}
-                        <span className="sr-only"> (opens in a new tab)</span>
-                      </a>
-                    ) : (
-                      cycle.verification.source.title
-                    )}
-                  </>
-                )}
-              </p>
-            ) : (
-              <p className="text-sm">
-                These requirements have not yet been verified against an official source.
-              </p>
-            )}
+            <VerificationLine verification={cycle.verification} />
 
             {(cycle.applicationDeadline || cycle.applicationUrl) && (
               <div className="flex flex-wrap items-center gap-4">
@@ -195,16 +171,9 @@ export function ProgrammeDetailPage() {
                   </p>
                 )}
                 {cycle.applicationUrl && (
-                  <a
-                    href={cycle.applicationUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-md border-2 border-blue-700 px-4 py-2 font-semibold no-underline hover:bg-blue-50"
-                  >
+                  <ExternalLinkButton href={cycle.applicationUrl}>
                     Apply on the official website
-                    <ExternalLink aria-hidden="true" className="size-4" />
-                    <span className="sr-only">(opens in a new tab)</span>
-                  </a>
+                  </ExternalLinkButton>
                 )}
               </div>
             )}
