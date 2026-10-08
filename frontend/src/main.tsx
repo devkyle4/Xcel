@@ -5,6 +5,7 @@ import { createBrowserRouter } from 'react-router';
 import { RouterProvider } from 'react-router/dom';
 import { createQueryClient } from './lib/api';
 import { routes } from './routes';
+import '@fontsource-variable/plus-jakarta-sans';
 import './styles/global.css';
 
 const router = createBrowserRouter(routes);
