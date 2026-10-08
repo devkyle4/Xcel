@@ -40,6 +40,8 @@ export interface SubjectInfo {
   name: string;
   category: SubjectCategory;
   aliases: string[];
+  /** Inactive subjects are not offered for results entry but may still appear in requirements. */
+  isActive: boolean;
 }
 
 export interface GradeInfo {

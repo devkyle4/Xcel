@@ -117,6 +117,12 @@ describe('seed', () => {
       .from(appSettings)
       .where(eq(appSettings.key, SETTING_KEYS.staleAfterDays));
     expect(setting?.value).toBe(90);
+
+    // Restore the default for test files that run afterwards.
+    await db
+      .update(appSettings)
+      .set({ value: 365 })
+      .where(eq(appSettings.key, SETTING_KEYS.staleAfterDays));
   });
 });
 

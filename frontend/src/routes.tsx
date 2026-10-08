@@ -22,14 +22,31 @@ export const routes: RouteObject[] = [
   {
     element: <AppLayout />,
     errorElement: <ErrorPage />,
+    // Shown while a code-split page loads on first visit, instead of a blank screen.
+    hydrateFallbackElement: (
+      <p role="status" className="p-8">
+        Loading…
+      </p>
+    ),
     children: [
       { index: true, element: <HomePage /> },
       {
         path: CHECK_ELIGIBILITY_PATH.slice(1),
-        lazy: comingSoon(
-          'Check your eligibility',
-          'Enter your WASSCE results to see which programmes match.',
-        ),
+        lazy: async () => ({
+          Component: (await import('./pages/CheckEligibilityPage')).CheckEligibilityPage,
+        }),
+      },
+      {
+        path: `${CHECK_ELIGIBILITY_PATH.slice(1)}/results`,
+        lazy: async () => ({
+          Component: (await import('./pages/EligibilityResultsPage')).EligibilityResultsPage,
+        }),
+      },
+      {
+        path: 'programmes/:id',
+        lazy: async () => ({
+          Component: (await import('./pages/ProgrammeDetailPage')).ProgrammeDetailPage,
+        }),
       },
       {
         path: 'programmes',

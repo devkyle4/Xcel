@@ -253,7 +253,7 @@ afterAll(async () => {
 });
 
 describe('GET /api/subjects and /api/grades', () => {
-  it('lists active subjects and grades in rank order, cacheably', async () => {
+  it('lists subjects and grades in rank order, cacheably', async () => {
     const subjects = await get<{ code: string }[]>('/api/subjects');
     expect(subjects.body.map((s) => s.code)).toContain('ENGLISH');
     expect(subjects.res.headers.get('cache-control')).toContain('s-maxage=300');

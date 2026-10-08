@@ -7,7 +7,8 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:3001',
+      // Override to run the frontend against another API instance.
+      '/api': process.env.API_PROXY_TARGET ?? 'http://localhost:3001',
     },
   },
   test: {

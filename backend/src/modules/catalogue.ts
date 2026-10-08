@@ -1,5 +1,5 @@
 import type { AcademicCatalogue, GradeInfo, SubjectInfo } from '@xcel/shared';
-import { asc, eq } from 'drizzle-orm';
+import { asc } from 'drizzle-orm';
 import { Hono } from 'hono';
 import type { Db } from '../db/client';
 import { grades, subjects } from '../db/schema';
@@ -31,15 +31,16 @@ export async function loadCatalogue(db: Db): Promise<AcademicCatalogue> {
 export function catalogueRoutes(db: () => Db) {
   return new Hono()
     .get('/subjects', async (c) => {
+      // All subjects, so requirements that mention a since-deactivated subject still read well.
       const rows: SubjectInfo[] = await db()
         .select({
           code: subjects.code,
           name: subjects.name,
           category: subjects.category,
           aliases: subjects.aliases,
+          isActive: subjects.isActive,
         })
         .from(subjects)
-        .where(eq(subjects.isActive, true))
         .orderBy(asc(subjects.category), asc(subjects.name));
       cachePublicly(c, 300);
       return c.json(rows);

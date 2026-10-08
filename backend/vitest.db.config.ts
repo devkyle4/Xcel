@@ -23,5 +23,7 @@ export default defineConfig({
     env: { DATABASE_URL: testUrl },
     // Test files share one database, so run them one at a time.
     fileParallelism: false,
+    // Random file order (seed is printed) so tests cannot quietly depend on each other.
+    sequence: { shuffle: { files: true, tests: false } },
   },
 });

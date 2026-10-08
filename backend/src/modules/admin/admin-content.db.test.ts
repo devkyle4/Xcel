@@ -446,6 +446,8 @@ describe('sources and verification', () => {
 
 describe('stale records', () => {
   it('flags published records verified longer ago than the configured threshold', async () => {
+    // Set the threshold explicitly rather than relying on the seeded default.
+    await api('PATCH', '/api/admin/settings', { staleAfterDays: 365 });
     const { body: uni } = await newUniversity('Stale University');
     await publishUniversity(uni.id);
     const source = await api<{ id: string }>('POST', '/api/admin/sources', { title: 'Old source' });
@@ -466,16 +468,26 @@ describe('stale records', () => {
     expect(stale.body.staleAfterDays).toBe(365);
     expect(stale.body.items.map((i) => i.entityId)).toContain(uni.id);
 
-    const settings = await api('PATCH', '/api/admin/settings', { staleAfterDays: 500 });
-    expect(settings.body).toEqual({ staleAfterDays: 500 });
-    const relaxed = await api<{ items: { entityId: string }[] }>(
-      'GET',
-      '/api/admin/verification/stale',
-    );
-    expect(relaxed.body.items.map((i) => i.entityId)).not.toContain(uni.id);
+    try {
+      const settings = await api('PATCH', '/api/admin/settings', { staleAfterDays: 500 });
+      expect(settings.body).toEqual({ staleAfterDays: 500 });
+      const relaxed = await api<{ items: { entityId: string }[] }>(
+        'GET',
+        '/api/admin/verification/stale',
+      );
+      expect(relaxed.body.items.map((i) => i.entityId)).not.toContain(uni.id);
 
-    expect(await auditActions('stale_after_days')).toEqual(['settings.update']);
-    await api('PATCH', '/api/admin/settings', { staleAfterDays: 365 });
+      const [latest] = await db
+        .select({ action: auditLogs.action, after: auditLogs.after })
+        .from(auditLogs)
+        .where(eq(auditLogs.entityId, 'stale_after_days'))
+        .orderBy(sql`${auditLogs.id} DESC`)
+        .limit(1);
+      expect(latest).toEqual({ action: 'settings.update', after: { staleAfterDays: 500 } });
+    } finally {
+      // Other test files rely on the default threshold.
+      await api('PATCH', '/api/admin/settings', { staleAfterDays: 365 });
+    }
   });
 
   it('rejects an invalid threshold', async () => {

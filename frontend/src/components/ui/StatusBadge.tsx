@@ -2,6 +2,7 @@ import type { EligibilityStatus } from '@xcel/shared';
 import { CircleCheck, CircleHelp, CircleX } from 'lucide-react';
 import type { ComponentType, SVGProps } from 'react';
 import { DashedCircleCheck } from './StatusIcons';
+import { STATUS_LABELS } from './status-labels';
 
 interface StatusStyle {
   label: string;
@@ -11,14 +12,26 @@ interface StatusStyle {
 
 /** SRS 11.6: every status has a colour, an icon and a text label. */
 const STATUS_STYLES: Record<EligibilityStatus, StatusStyle> = {
-  Eligible: { label: 'Eligible', Icon: CircleCheck, className: 'bg-green-100 text-green-900' },
+  Eligible: {
+    label: STATUS_LABELS.Eligible,
+    Icon: CircleCheck,
+    className: 'bg-green-100 text-green-900',
+  },
   LikelyEligible: {
-    label: 'Likely eligible',
+    label: STATUS_LABELS.LikelyEligible,
     Icon: DashedCircleCheck,
     className: 'border border-green-300 bg-green-50 text-green-800',
   },
-  NeedsReview: { label: 'Needs review', Icon: CircleHelp, className: 'bg-blue-100 text-blue-900' },
-  NotEligible: { label: 'Not eligible', Icon: CircleX, className: 'bg-red-100 text-red-800' },
+  NeedsReview: {
+    label: STATUS_LABELS.NeedsReview,
+    Icon: CircleHelp,
+    className: 'bg-blue-100 text-blue-900',
+  },
+  NotEligible: {
+    label: STATUS_LABELS.NotEligible,
+    Icon: CircleX,
+    className: 'bg-red-100 text-red-800',
+  },
 };
 
 /**

@@ -321,8 +321,9 @@ describe('subjects', () => {
     await api('PATCH', '/api/admin/subjects/FURTHER_MATHS', { isActive: false });
     const publicSubjects = (await (await app.request('/api/subjects')).json()) as {
       code: string;
+      isActive: boolean;
     }[];
-    expect(publicSubjects.map((s) => s.code)).not.toContain('FURTHER_MATHS');
+    expect(publicSubjects.find((s) => s.code === 'FURTHER_MATHS')?.isActive).toBe(false);
 
     expect((await api('DELETE', '/api/admin/subjects/FURTHER_MATHS')).status).toBe(204);
     const actions = await db
